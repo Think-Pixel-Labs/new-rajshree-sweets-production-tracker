@@ -14,7 +14,16 @@
     </header>
 
     <main>
-        <section id="addLogSection">
+        <section id="loginSection">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="text" id="username" placeholder="Username" required>
+                <input type="password" id="password" placeholder="Password" required>
+                <button type="submit">Login</button>
+            </form>
+        </section>
+
+        <section id="addLogSection" style="display: none;">
             <h2>Add Production Log</h2>
             <form id="productionForm">
                 <div class="form-group">
@@ -38,7 +47,7 @@
             </form>
         </section>
 
-        <section id="viewLogsSection">
+        <section id="viewLogsSection" style="display: none;">
             <h2>View Production Logs</h2>
             <div class="date-filter">
                 <label for="startDate">Start Date:</label>
@@ -64,11 +73,43 @@
     </main>
 
     <script>
+        let token = '';
         let products = [];
         let manufacturingUnits = [];
 
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            const data = await response.json();
+            if (data.success) {
+                token = data.token;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('addLogSection').style.display = 'block';
+                document.getElementById('viewLogsSection').style.display = 'block';
+                fetchProducts();
+                fetchManufacturingUnits();
+                fetchProductionData();
+            } else {
+                alert('Login failed. Please try again.');
+            }
+        });
+
         async function fetchProducts() {
-            const response = await fetch('/api/products');
+            const response = await fetch('/api/products', {
+                headers: {
+                    'Authorization': token
+                }
+            });
             products = await response.json();
             const productSelect = document.getElementById('productSelect');
             productSelect.innerHTML = '<option value="">Select a product</option>';
@@ -81,7 +122,11 @@
         }
 
         async function fetchManufacturingUnits() {
-            const response = await fetch('/api/manufacturing-units');
+            const response = await fetch('/api/manufacturing-units', {
+                headers: {
+                    'Authorization': token
+                }
+            });
             manufacturingUnits = await response.json();
             const manufacturingUnitSelect = document.getElementById('manufacturingUnitSelect');
             manufacturingUnitSelect.innerHTML = '<option value="">Select a manufacturing unit</option>';
@@ -112,6 +157,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': token
                 },
                 body: JSON.stringify({ productId, quantityManufactured, manufacturedByUnitId }),
             });
@@ -131,7 +177,11 @@
             if (startDate && endDate) {
                 url += `?startDate=${startDate}&endDate=${endDate}`;
             }
-            const response = await fetch(url);
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': token
+                }
+            });
             const data = await response.json();
             const tbody = document.getElementById('productionData');
             tbody.innerHTML = '';
@@ -166,6 +216,7 @@
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': token
                 },
                 body: JSON.stringify({ quantityManufactured: quantity, updationReason: reason }),
             });
@@ -178,10 +229,6 @@
         }
 
         document.getElementById('filterButton').addEventListener('click', fetchProductionData);
-
-        fetchProducts();
-        fetchManufacturingUnits();
-        fetchProductionData();
     </script>
 </body>
 
