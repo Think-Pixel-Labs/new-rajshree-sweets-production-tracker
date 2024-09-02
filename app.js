@@ -121,7 +121,7 @@ function createWindow() {
 
     // API endpoint to get all products
     serverApp.get('/api/products', authMiddleware, (req, res) => {
-        db.all('SELECT * FROM products', (err, rows) => {
+        db.all('SELECT p.id, p.name, p.categoryId, u.name as unit FROM products p JOIN units u ON p.unitId = u.id', (err, rows) => {
             if (err) {
                 res.status(500).json({ error: err.message });
                 return;
