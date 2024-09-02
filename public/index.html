@@ -9,28 +9,44 @@
 </head>
 
 <body>
-    <h1>Production Tracker</h1>
+    <header>
+        <h1>Production Tracker</h1>
+    </header>
 
-    <div class="container">
+    <main>
         <section id="addLogSection">
             <h2>Add Production Log</h2>
             <form id="productionForm">
-                <select id="productSelect" required>
-                    <option value="">Select a product</option>
-                </select>
-                <div>
-                    <input type="number" id="quantity" placeholder="Quantity" required>
+                <div class="form-group">
+                    <label for="productSelect">Product:</label>
+                    <select id="productSelect" required>
+                        <option value="">Select a product</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="quantity">Quantity:</label>
+                    <input type="number" id="quantity" required>
                     <span id="unitType"></span>
                 </div>
-                <select id="manufacturingUnitSelect" required>
-                    <option value="">Select a manufacturing unit</option>
-                </select>
+                <div class="form-group">
+                    <label for="manufacturingUnitSelect">Manufacturing Unit:</label>
+                    <select id="manufacturingUnitSelect" required>
+                        <option value="">Select a manufacturing unit</option>
+                    </select>
+                </div>
                 <button type="submit">Add Production Log</button>
             </form>
         </section>
 
         <section id="viewLogsSection">
             <h2>View Production Logs</h2>
+            <div class="date-filter">
+                <label for="startDate">Start Date:</label>
+                <input type="date" id="startDate">
+                <label for="endDate">End Date:</label>
+                <input type="date" id="endDate">
+                <button id="filterButton">Filter</button>
+            </div>
             <table id="productionTable">
                 <thead>
                     <tr>
@@ -45,7 +61,7 @@
                 <tbody id="productionData"></tbody>
             </table>
         </section>
-    </div>
+    </main>
 
     <script>
         let products = [];
@@ -67,30 +83,24 @@
         async function fetchManufacturingUnits() {
             const response = await fetch('/api/manufacturing-units');
             manufacturingUnits = await response.json();
-        }
-
-        document.getElementById('productSelect').addEventListener('change', function () {
-            const selectedProduct = products.find(p => p.id == this.value);
-            if (selectedProduct) {
-                document.getElementById('unitType').textContent = selectedProduct.unit;
-                updateManufacturingUnits(selectedProduct.manufacturingUnitIds);
-            } else {
-                document.getElementById('unitType').textContent = '';
-                document.getElementById('manufacturingUnitSelect').innerHTML = '<option value="">Select a manufacturing unit</option>';
-            }
-        });
-
-        function updateManufacturingUnits(manufacturingUnitIds) {
-            const ids = manufacturingUnitIds.split(',').map(id => parseInt(id.trim()));
             const manufacturingUnitSelect = document.getElementById('manufacturingUnitSelect');
             manufacturingUnitSelect.innerHTML = '<option value="">Select a manufacturing unit</option>';
-            manufacturingUnits.filter(unit => ids.includes(unit.id)).forEach(unit => {
+            manufacturingUnits.forEach(unit => {
                 const option = document.createElement('option');
                 option.value = unit.id;
                 option.textContent = unit.name;
                 manufacturingUnitSelect.appendChild(option);
             });
         }
+
+        document.getElementById('productSelect').addEventListener('change', function () {
+            const selectedProduct = products.find(p => p.id == this.value);
+            if (selectedProduct) {
+                document.getElementById('unitType').textContent = selectedProduct.unit;
+            } else {
+                document.getElementById('unitType').textContent = '';
+            }
+        });
 
         document.getElementById('productionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -115,7 +125,13 @@
         });
 
         async function fetchProductionData() {
-            const response = await fetch('/api/production');
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            let url = '/api/production';
+            if (startDate && endDate) {
+                url += `?startDate=${startDate}&endDate=${endDate}`;
+            }
+            const response = await fetch(url);
             const data = await response.json();
             const tbody = document.getElementById('productionData');
             tbody.innerHTML = '';
@@ -160,6 +176,8 @@
                 alert('Failed to update log');
             }
         }
+
+        document.getElementById('filterButton').addEventListener('click', fetchProductionData);
 
         fetchProducts();
         fetchManufacturingUnits();

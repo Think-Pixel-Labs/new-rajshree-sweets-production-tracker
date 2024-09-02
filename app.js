@@ -66,9 +66,20 @@ function createWindow() {
             });
     });
 
-    // API endpoint to get production logs
+    // API endpoint to get production logs with date range
     serverApp.get('/api/production', authMiddleware, (req, res) => {
-        db.all('SELECT * FROM productionLog ORDER BY createdAt DESC', (err, rows) => {
+        const { startDate, endDate } = req.query;
+        let query = 'SELECT * FROM productionLog';
+        let params = [];
+
+        if (startDate && endDate) {
+            query += ' WHERE createdAt BETWEEN ? AND ?';
+            params = [startDate, endDate];
+        }
+
+        query += ' ORDER BY createdAt DESC';
+
+        db.all(query, params, (err, rows) => {
             if (err) {
                 res.status(500).json({ error: err.message });
                 return;
