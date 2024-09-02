@@ -151,6 +151,21 @@
         #editForm button {
             margin-right: 10px;
         }
+
+        .password-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            user-select: none;
+        }
     </style>
 </head>
 
@@ -166,7 +181,10 @@
                 <h2>Production Tracker Login</h2>
                 <form id="loginForm">
                     <input type="text" id="username" placeholder="Username" required>
-                    <input type="password" id="password" placeholder="Password" required>
+                    <div class="password-container">
+                        <input type="password" id="password" placeholder="Password" required>
+                        <span class="password-toggle" id="passwordToggle">👁️</span>
+                    </div>
                     <button type="submit">Login</button>
                 </form>
             </div>
@@ -467,6 +485,17 @@
         }
 
         document.getElementById('filterButton').addEventListener('click', fetchProductionData);
+
+        document.getElementById('passwordToggle').addEventListener('click', function () {
+            const passwordInput = document.getElementById('password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                this.textContent = '🔒';
+            } else {
+                passwordInput.type = 'password';
+                this.textContent = '👁️';
+            }
+        });
     </script>
 </body>
 
