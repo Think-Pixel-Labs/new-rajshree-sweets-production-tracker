@@ -109,6 +109,48 @@
             /* Adjusted to account for the header */
             /* Adjust based on your header height */
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        #editForm .form-group {
+            margin-bottom: 15px;
+        }
+
+        #editForm label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        #editForm input,
+        #editForm select,
+        #editForm textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        #editForm button {
+            margin-right: 10px;
+        }
     </style>
 </head>
 
@@ -178,6 +220,28 @@
             </table>
         </section>
     </main>
+
+    <div id="editDialog" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>Edit Production Log</h3>
+            <form id="editForm">
+                <div class="form-group">
+                    <label for="editQuantity">Quantity:</label>
+                    <input type="number" id="editQuantity" required>
+                </div>
+                <div class="form-group">
+                    <label for="editManufacturingUnit">Manufacturing Unit:</label>
+                    <select id="editManufacturingUnit" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="editReason">Updation Reason:</label>
+                    <textarea id="editReason" required></textarea>
+                </div>
+                <button type="submit">Update</button>
+                <button type="button" onclick="closeEditDialog()">Cancel</button>
+            </form>
+        </div>
+    </div>
 
     <script>
         let token = '';
@@ -313,29 +377,66 @@
                 const actionsCell = row.insertCell(5);
                 const editButton = document.createElement('button');
                 editButton.textContent = 'Edit';
-                editButton.onclick = () => editLog(item.id, item.quantityManufactured);
+                editButton.onclick = () => editLog(item.id, item.quantityManufactured, item.manufacturedByUnitId);
                 actionsCell.appendChild(editButton);
             });
         }
 
-        function editLog(id, currentQuantity) {
-            const newQuantity = prompt('Enter new quantity:', currentQuantity);
-            if (newQuantity === null) return; // User cancelled
+        let currentEditId = null;
 
-            const reason = prompt('Enter reason for update:');
-            if (reason === null) return; // User cancelled
+        function editLog(id, currentQuantity, currentUnitId) {
+            currentEditId = id;
+            const editDialog = document.getElementById('editDialog');
+            const editQuantity = document.getElementById('editQuantity');
+            const editManufacturingUnit = document.getElementById('editManufacturingUnit');
+            const editReason = document.getElementById('editReason');
 
-            updateLog(id, newQuantity, reason);
+            editQuantity.value = currentQuantity;
+            populateManufacturingUnits(editManufacturingUnit, currentUnitId);
+            editReason.value = '';
+
+            editDialog.style.display = 'block';
         }
 
-        async function updateLog(id, quantity, reason) {
+        function closeEditDialog() {
+            document.getElementById('editDialog').style.display = 'none';
+        }
+
+        function populateManufacturingUnits(selectElement, selectedUnitId) {
+            selectElement.innerHTML = '<option value="">Select a manufacturing unit</option>';
+            manufacturingUnits.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit.id;
+                option.textContent = unit.name;
+                if (unit.id == selectedUnitId) {
+                    option.selected = true;
+                }
+                selectElement.appendChild(option);
+            });
+        }
+
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const quantity = document.getElementById('editQuantity').value;
+            const manufacturedByUnitId = document.getElementById('editManufacturingUnit').value;
+            const reason = document.getElementById('editReason').value;
+
+            await updateLog(currentEditId, quantity, manufacturedByUnitId, reason);
+            closeEditDialog();
+        });
+
+        async function updateLog(id, quantity, manufacturedByUnitId, reason) {
             const response = await fetch(`/api/production/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': token
                 },
-                body: JSON.stringify({ quantityManufactured: quantity, updationReason: reason }),
+                body: JSON.stringify({
+                    quantityManufactured: quantity,
+                    manufacturedByUnitId: manufacturedByUnitId,
+                    updationReason: reason
+                }),
             });
 
             if (response.ok) {
