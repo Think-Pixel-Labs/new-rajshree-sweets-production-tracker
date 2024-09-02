@@ -106,10 +106,9 @@ function createWindow() {
             }
 
             const initialQuantity = row.quantityManufactured;
-            const updatedReason = `Initial Quantity: ${initialQuantity}. ${updationReason}`;
 
             db.run('UPDATE productionLog SET quantityManufactured = ?, updationReason = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?',
-                [quantityManufactured, updatedReason, id], function (err) {
+                [quantityManufactured, updationReason, id], function (err) {
                     if (err) {
                         res.status(500).json({ error: err.message });
                         return;
