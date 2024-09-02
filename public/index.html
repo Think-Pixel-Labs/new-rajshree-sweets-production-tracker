@@ -71,27 +71,42 @@
         .app-header {
             position: fixed;
             top: 0;
+            left: 0;
             right: 0;
             padding: 1rem;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             z-index: 1000;
+        }
+
+        .app-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
         }
 
         .logout-button {
             padding: 0.5rem 1rem;
-            background-color: #f44336;
-            color: white;
-            border: none;
+            background-color: #fff;
+            color: #333;
+            border: 1px solid #ddd;
             border-radius: 4px;
             cursor: pointer;
             font-size: 0.9rem;
+            transition: all 0.3s ease;
         }
 
         .logout-button:hover {
-            background-color: #d32f2f;
+            background-color: #f1f3f5;
+            border-color: #c8ced6;
         }
 
         .content-container {
-            padding-top: 60px;
+            padding-top: 70px;
+            /* Adjusted to account for the header */
             /* Adjust based on your header height */
         }
     </style>
@@ -99,6 +114,7 @@
 
 <body>
     <header class="app-header">
+        <div class="app-title">Production Tracker</div>
         <button id="logoutButton" class="logout-button" style="display: none;">Logout</button>
     </header>
 
