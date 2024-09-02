@@ -208,11 +208,12 @@
             <table id="productionTable">
                 <thead>
                     <tr>
-                        <th>Date</th>
+                        <th>Created At</th>
                         <th>Product</th>
                         <th>Quantity</th>
                         <th>Manufacturing Unit</th>
                         <th>Updation Reason</th>
+                        <th>Updated At</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -351,6 +352,20 @@
             }
         });
 
+        function formatDateTimeIndian(dateString) {
+            const date = new Date(dateString);
+            const day = date.getDate().toString().padStart(2, '0');
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const year = date.getFullYear();
+            let hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            const timeString = `${hours}:${minutes} ${ampm}`;
+            return `${day}-${month}-${year} ${timeString}`;
+        }
+
         async function fetchProductionData() {
             const startDate = document.getElementById('startDate').value;
             const endDate = document.getElementById('endDate').value;
@@ -368,13 +383,14 @@
             tbody.innerHTML = '';
             data.forEach(item => {
                 const row = tbody.insertRow();
-                row.insertCell(0).textContent = new Date(item.createdAt).toLocaleDateString();
+                row.insertCell(0).textContent = formatDateTimeIndian(item.createdAt);
                 row.insertCell(1).textContent = products.find(p => p.id == item.productId)?.name || 'Unknown';
                 row.insertCell(2).textContent = `${item.quantityManufactured} ${products.find(p => p.id == item.productId)?.unit || ''}`;
                 row.insertCell(3).textContent = manufacturingUnits.find(u => u.id == item.manufacturedByUnitId)?.name || 'Unknown';
                 row.insertCell(4).textContent = item.updationReason || '-';
+                row.insertCell(5).textContent = item.updatedAt ? formatDateTimeIndian(item.updatedAt) : '-';
 
-                const actionsCell = row.insertCell(5);
+                const actionsCell = row.insertCell(6);
                 const editButton = document.createElement('button');
                 editButton.textContent = 'Edit';
                 editButton.onclick = () => editLog(item.id, item.quantityManufactured, item.manufacturedByUnitId);
