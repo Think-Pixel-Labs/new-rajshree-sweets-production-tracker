@@ -1,0 +1,24 @@
+{
+  "name": "productionmanager",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron ./app.js",
+    "server": "node server.js",
+    "dev": "nodemon --watch . --exec electron ./app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "csvtojson": "^2.0.10",
+    "electron": "^32.0.1",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
+}

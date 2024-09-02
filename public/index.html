@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <h1>Production Tracker</h1>
+
+    <div class="container">
+        <section id="addLogSection">
+            <h2>Add Production Log</h2>
+            <form id="productionForm">
+                <select id="productSelect" required>
+                    <option value="">Select a product</option>
+                </select>
+                <div>
+                    <input type="number" id="quantity" placeholder="Quantity" required>
+                    <span id="unitType"></span>
+                </div>
+                <select id="manufacturingUnitSelect" required>
+                    <option value="">Select a manufacturing unit</option>
+                </select>
+                <button type="submit">Add Production Log</button>
+            </form>
+        </section>
+
+        <section id="viewLogsSection">
+            <h2>View Production Logs</h2>
+            <table id="productionTable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Manufacturing Unit</th>
+                        <th>Updation Reason</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productionData"></tbody>
+            </table>
+        </section>
+    </div>
+
+    <script>
+        let products = [];
+        let manufacturingUnits = [];
+
+        async function fetchProducts() {
+            const response = await fetch('/api/products');
+            products = await response.json();
+            const productSelect = document.getElementById('productSelect');
+            productSelect.innerHTML = '<option value="">Select a product</option>';
+            products.forEach(product => {
+                const option = document.createElement('option');
+                option.value = product.id;
+                option.textContent = product.name;
+                productSelect.appendChild(option);
+            });
+        }
+
+        async function fetchManufacturingUnits() {
+            const response = await fetch('/api/manufacturing-units');
+            manufacturingUnits = await response.json();
+        }
+
+        document.getElementById('productSelect').addEventListener('change', function () {
+            const selectedProduct = products.find(p => p.id == this.value);
+            if (selectedProduct) {
+                document.getElementById('unitType').textContent = selectedProduct.unit;
+                updateManufacturingUnits(selectedProduct.manufacturingUnitIds);
+            } else {
+                document.getElementById('unitType').textContent = '';
+                document.getElementById('manufacturingUnitSelect').innerHTML = '<option value="">Select a manufacturing unit</option>';
+            }
+        });
+
+        function updateManufacturingUnits(manufacturingUnitIds) {
+            const ids = manufacturingUnitIds.split(',').map(id => parseInt(id.trim()));
+            const manufacturingUnitSelect = document.getElementById('manufacturingUnitSelect');
+            manufacturingUnitSelect.innerHTML = '<option value="">Select a manufacturing unit</option>';
+            manufacturingUnits.filter(unit => ids.includes(unit.id)).forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit.id;
+                option.textContent = unit.name;
+                manufacturingUnitSelect.appendChild(option);
+            });
+        }
+
+        document.getElementById('productionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const productId = document.getElementById('productSelect').value;
+            const quantityManufactured = document.getElementById('quantity').value;
+            const manufacturedByUnitId = document.getElementById('manufacturingUnitSelect').value;
+
+            const response = await fetch('/api/production', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId, quantityManufactured, manufacturedByUnitId }),
+            });
+
+            if (response.ok) {
+                fetchProductionData();
+                document.getElementById('productionForm').reset();
+            } else {
+                alert('Failed to add production log');
+            }
+        });
+
+        async function fetchProductionData() {
+            const response = await fetch('/api/production');
+            const data = await response.json();
+            const tbody = document.getElementById('productionData');
+            tbody.innerHTML = '';
+            data.forEach(item => {
+                const row = tbody.insertRow();
+                row.insertCell(0).textContent = new Date(item.createdAt).toLocaleDateString();
+                row.insertCell(1).textContent = products.find(p => p.id == item.productId)?.name || 'Unknown';
+                row.insertCell(2).textContent = `${item.quantityManufactured} ${products.find(p => p.id == item.productId)?.unit || ''}`;
+                row.insertCell(3).textContent = manufacturingUnits.find(u => u.id == item.manufacturedByUnitId)?.name || 'Unknown';
+                row.insertCell(4).textContent = item.updationReason || '-';
+
+                const actionsCell = row.insertCell(5);
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Edit';
+                editButton.onclick = () => editLog(item.id, item.quantityManufactured);
+                actionsCell.appendChild(editButton);
+            });
+        }
+
+        function editLog(id, currentQuantity) {
+            const newQuantity = prompt('Enter new quantity:', currentQuantity);
+            if (newQuantity === null) return; // User cancelled
+
+            const reason = prompt('Enter reason for update:');
+            if (reason === null) return; // User cancelled
+
+            updateLog(id, newQuantity, reason);
+        }
+
+        async function updateLog(id, quantity, reason) {
+            const response = await fetch(`/api/production/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ quantityManufactured: quantity, updationReason: reason }),
+            });
+
+            if (response.ok) {
+                fetchProductionData();
+            } else {
+                alert('Failed to update log');
+            }
+        }
+
+        fetchProducts();
+        fetchManufacturingUnits();
+        fetchProductionData();
+    </script>
+</body>
+
+</html>
