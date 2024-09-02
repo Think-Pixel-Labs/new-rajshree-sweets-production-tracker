@@ -354,6 +354,10 @@
 
         function formatDateTimeIndian(dateString) {
             const date = new Date(dateString);
+            // Convert to IST by adding 5 hours and 30 minutes
+            date.setHours(date.getHours() + 5);
+            date.setMinutes(date.getMinutes() + 30);
+
             const day = date.getDate().toString().padStart(2, '0');
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const year = date.getFullYear();
