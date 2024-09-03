@@ -19,7 +19,6 @@
   "description": "",
   "dependencies": {
     "csvtojson": "^2.0.10",
-    "electron": "^32.0.1",
     "electron-updater": "^6.2.1",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
@@ -27,6 +26,7 @@
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
+    "electron": "^32.0.1",
     "electron-builder": "^24.13.3",
     "nodemon": "^3.1.4"
   },
