@@ -1,4 +1,4 @@
-const sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('better-sqlite3').verbose();
 const fs = require('fs');
 const path = require('path');
 const csv = require('csvtojson');

@@ -10,23 +10,26 @@ on:
 
 jobs:
   release:
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        os: [windows-latest]
+    runs-on: windows-latest
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v2
+      - name: Install Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 14
+          node-version: 20
+
+      - name: Install Visual Studio Build Tools
+        uses: microsoft/vs-buildtools@v1
+        with:
+          components: Microsoft.VisualStudio.Workload.VCTools
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm config set msvs_version 2019
+          npm install
 
       - name: Build/release Electron app
         uses: samuelmeuli/action-electron-builder@v1
@@ -35,7 +38,7 @@ jobs:
           release: ${{ startsWith(github.ref, 'refs/tags/v') }}
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: dist
           path: dist

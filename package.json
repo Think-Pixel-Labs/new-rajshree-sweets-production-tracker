@@ -1,6 +1,7 @@
 {
   "name": "productionmanager",
   "version": "1.0.0",
+  "productName": "New Rajshree Sweets Production Tracker",
   "main": "index.js",
   "scripts": {
     "start": "electron ./app.js",
@@ -16,14 +17,14 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Production management system for New Rajshree Sweets",
   "dependencies": {
     "csvtojson": "^2.0.10",
     "electron-updater": "^6.2.1",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "moment-timezone": "^0.5.45",
-    "sqlite3": "^5.1.7"
+    "better-sqlite3": "^8.0.0"
   },
   "devDependencies": {
     "electron": "^32.0.1",
