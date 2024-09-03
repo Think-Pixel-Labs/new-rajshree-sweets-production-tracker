@@ -370,15 +370,19 @@
             }
         });
 
-        function formatDateTime(dateString) {
+        function formatDateTimeIndian(dateString) {
             const date = new Date(dateString);
+
             const day = date.getDate().toString().padStart(2, '0');
             const month = (date.getMonth() + 1).toString().padStart(2, '0');
             const year = date.getFullYear();
-            const hours = date.getHours().toString().padStart(2, '0');
+            let hours = date.getHours();
             const minutes = date.getMinutes().toString().padStart(2, '0');
-            const seconds = date.getSeconds().toString().padStart(2, '0');
-            return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            const timeString = `${hours}:${minutes} ${ampm}`;
+            return `${day}-${month}-${year} ${timeString}`;
         }
 
         async function fetchProductionData() {
@@ -398,12 +402,12 @@
             tbody.innerHTML = '';
             data.forEach(item => {
                 const row = tbody.insertRow();
-                row.insertCell(0).textContent = formatDateTime(item.createdAt);
+                row.insertCell(0).textContent = formatDateTimeIndian(item.createdAt);
                 row.insertCell(1).textContent = products.find(p => p.id == item.productId)?.name || 'Unknown';
                 row.insertCell(2).textContent = `${item.quantityManufactured} ${products.find(p => p.id == item.productId)?.unit || ''}`;
                 row.insertCell(3).textContent = manufacturingUnits.find(u => u.id == item.manufacturedByUnitId)?.name || 'Unknown';
                 row.insertCell(4).textContent = item.updationReason || '-';
-                row.insertCell(5).textContent = item.updatedAt ? formatDateTime(item.updatedAt) : '-';
+                row.insertCell(5).textContent = item.updatedAt ? formatDateTimeIndian(item.updatedAt) : '-';
 
                 const actionsCell = row.insertCell(6);
                 const editButton = document.createElement('button');

@@ -2,6 +2,10 @@ const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 const path = require('path');
 const csv = require('csvtojson');
+const moment = require('moment-timezone');
+
+// Set the default timezone for the application
+moment.tz.setDefault('Asia/Kolkata');
 
 const dbPath = './production.db';
 
@@ -47,14 +51,14 @@ if (!dbExists) {
             name TEXT NOT NULL
         )`);
 
-        // Create ProductionLog table
+        // Modify the ProductionLog table creation
         db.run(`CREATE TABLE IF NOT EXISTS productionLog (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             productId INTEGER,
             manufacturedByUnitId INTEGER,
             quantityManufactured REAL,
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            createdAt TIMESTAMP DEFAULT (datetime('now', 'localtime')),
+            updatedAt TIMESTAMP DEFAULT (datetime('now', 'localtime')),
             updationReason TEXT,
             FOREIGN KEY (productId) REFERENCES products(id),
             FOREIGN KEY (manufacturedByUnitId) REFERENCES manufacturingUnits(id)
@@ -99,5 +103,15 @@ if (!dbExists) {
 } else {
     console.log('Database file already exists. Skipping table creation and data insertion.');
 }
+
+// Add this function to ensure all date operations use IST
+db.getIST = () => {
+    return new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+};
+
+// Update the getISTDateTime function
+db.getISTDateTime = () => {
+    return moment().format('YYYY-MM-DD HH:mm:ss');
+};
 
 module.exports = db;
