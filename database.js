@@ -13,92 +13,74 @@ const dbPath = './production.db';
 const dbExists = fs.existsSync(dbPath);
 
 const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error(err.message);
-    }
+    if (err) console.error(err.message);
     console.log('Connected to the production database.');
 });
 
 // Only create tables and insert data if the database file didn't exist
 if (!dbExists) {
-    console.log('Database file not found. Creating tables and inserting initial data...');
-
-    // Create tables
+    console.log('Creating tables and inserting initial data...');
     db.serialize(() => {
-        // Create ManufacturingUnits table
-        db.run(`CREATE TABLE IF NOT EXISTS manufacturingUnits (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL
-        )`);
+        const tables = [
+            `CREATE TABLE IF NOT EXISTS manufacturingUnits (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL
+            )`,
+            `CREATE TABLE IF NOT EXISTS products (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                categoryId INTEGER REFERENCES categories(id),
+                unitId INTEGER REFERENCES units(id)
+            )`,
+            `CREATE TABLE IF NOT EXISTS units (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL
+            )`,
+            `CREATE TABLE IF NOT EXISTS categories (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL
+            )`,
+            `CREATE TABLE IF NOT EXISTS productionLog (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                productId INTEGER,
+                manufacturedByUnitId INTEGER,
+                quantityManufactured REAL,
+                createdAt TIMESTAMP DEFAULT (datetime('now', 'localtime')),
+                updatedAt TIMESTAMP DEFAULT (datetime('now', 'localtime')),
+                updationReason TEXT,
+                FOREIGN KEY (productId) REFERENCES products(id),
+                FOREIGN KEY (manufacturedByUnitId) REFERENCES manufacturingUnits(id)
+            )`,
+            `CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                password TEXT NOT NULL,
+                role TEXT NOT NULL
+            )`
+        ];
 
-        // Create Products table
-        db.run(`CREATE TABLE IF NOT EXISTS products (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            categoryId INTEGER REFERENCES categories(id),
-            unitId INTEGER REFERENCES units(id)
-        )`);
+        tables.forEach(table => db.run(table));
 
-        // Create Units table
-        db.run(`CREATE TABLE IF NOT EXISTS units (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL
-        )`);
-
-        // Create Categories table
-        db.run(`CREATE TABLE IF NOT EXISTS categories (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL
-        )`);
-
-        // Modify the ProductionLog table creation
-        db.run(`CREATE TABLE IF NOT EXISTS productionLog (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            productId INTEGER,
-            manufacturedByUnitId INTEGER,
-            quantityManufactured REAL,
-            createdAt TIMESTAMP DEFAULT (datetime('now', 'localtime')),
-            updatedAt TIMESTAMP DEFAULT (datetime('now', 'localtime')),
-            updationReason TEXT,
-            FOREIGN KEY (productId) REFERENCES products(id),
-            FOREIGN KEY (manufacturedByUnitId) REFERENCES manufacturingUnits(id)
-        )`);
-
-        // Create users table
-        db.run(`CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT NOT NULL,
-            password TEXT NOT NULL,
-            role TEXT NOT NULL
-        )`);
-
-        // Populate all the tables with the data from the csv files
         const dataDir = path.join(__dirname, 'public', 'data');
+        const csvFiles = [
+            { file: 'ManufacturingUnits.csv', table: 'manufacturingUnits', columns: ['id', 'name'] },
+            { file: 'Categories.csv', table: 'categories', columns: ['id', 'name'] },
+            { file: 'Units.csv', table: 'units', columns: ['id', 'name'] },
+            { file: 'Products.csv', table: 'products', columns: ['name', 'categoryId', 'unitId'] },
+            { file: 'Users.csv', table: 'users', columns: ['username', 'password', 'role'] }
+        ];
 
-        // Helper function to insert data from CSV
-        function insertDataFromCSV(filename, tableName, columns) {
+        csvFiles.forEach(({ file, table, columns }) => {
             csv()
-                .fromFile(path.join(dataDir, filename))
+                .fromFile(path.join(dataDir, file))
                 .then((data) => {
-                    const placeholders = columns.map(() => '?').join(',');
-                    const stmt = db.prepare(`INSERT INTO ${tableName} (${columns.join(',')}) VALUES (${placeholders})`);
-
-                    data.forEach((row) => {
-                        stmt.run(columns.map(col => row[col]));
-                    });
-
+                    const stmt = db.prepare(`INSERT INTO ${table} (${columns.join(',')}) VALUES (${columns.map(() => '?').join(',')})`);
+                    data.forEach((row) => stmt.run(columns.map(col => row[col])));
                     stmt.finalize();
-                    console.log(`Data inserted into ${tableName}`);
+                    console.log(`Data inserted into ${table}`);
                 })
-                .catch(err => console.error(`Error inserting data into ${tableName}:`, err));
-        }
-
-        // Insert data for each table
-        insertDataFromCSV('ManufacturingUnits.csv', 'manufacturingUnits', ['id', 'name']);
-        insertDataFromCSV('Categories.csv', 'categories', ['id', 'name']);
-        insertDataFromCSV('Units.csv', 'units', ['id', 'name']);
-        insertDataFromCSV('Products.csv', 'products', ['name', 'categoryId', 'unitId']);
-        insertDataFromCSV('Users.csv', 'users', ['username', 'password', 'role']);
+                .catch(err => console.error(`Error inserting data into ${table}:`, err));
+        });
     });
 } else {
     console.log('Database file already exists. Skipping table creation and data insertion.');
@@ -110,8 +92,6 @@ db.getIST = () => {
 };
 
 // Update the getISTDateTime function
-db.getISTDateTime = () => {
-    return moment().format('YYYY-MM-DD HH:mm:ss');
-};
+db.getISTDateTime = () => moment().format('YYYY-MM-DD HH:mm:ss');
 
 module.exports = db;
