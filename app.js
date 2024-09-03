@@ -1,4 +1,5 @@
 const { app, BrowserWindow, globalShortcut } = require('electron');
+const { autoUpdater } = require('electron-updater');
 const express = require('express');
 const serverApp = express();
 const db = require('./database');
@@ -6,6 +7,11 @@ const jwt = require('jsonwebtoken');
 
 const JWT_SECRET = 'kosag79-8dw@*(ugjklasdn#^gaskkf';
 let mainWindow;
+
+// Add this function to check for updates
+function checkForUpdates() {
+    autoUpdater.checkForUpdatesAndNotify();
+}
 
 const authMiddleware = (req, res, next) => {
     const token = req.headers['authorization'];
@@ -105,6 +111,9 @@ function createWindow() {
     });
 
     mainWindow.on('closed', () => mainWindow = null);
+
+    // Check for updates
+    checkForUpdates();
 }
 
 app.on('ready', () => {
@@ -112,6 +121,15 @@ app.on('ready', () => {
     globalShortcut.register('F11', () => {
         mainWindow.setFullScreen(!mainWindow.isFullScreen());
     });
+});
+
+// Add these event listeners for auto-update
+autoUpdater.on('update-available', () => {
+    mainWindow.webContents.send('update_available');
+});
+
+autoUpdater.on('update-downloaded', () => {
+    mainWindow.webContents.send('update_downloaded');
 });
 
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
