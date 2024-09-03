@@ -81,7 +81,8 @@ function createWindow() {
 
         db.all(query, params, (err, rows) => {
             if (err) {
-                res.status(500).json({ error: err.message });
+                console.error('Production log retrieval error:', err);
+                res.status(500).json({ error: 'An error occurred while processing your request' });
                 return;
             }
             res.json(rows);
