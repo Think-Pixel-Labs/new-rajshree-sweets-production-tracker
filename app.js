@@ -73,7 +73,7 @@ function createWindow() {
         let params = [];
 
         if (startDate && endDate) {
-            query += ' WHERE createdAt BETWEEN ? AND ?';
+            query += ' WHERE date(createdAt) BETWEEN ? AND ?';
             params = [startDate, endDate];
         }
 
@@ -85,6 +85,7 @@ function createWindow() {
                 res.status(500).json({ error: 'An error occurred while processing your request' });
                 return;
             }
+            console.log('Query results:', rows);
             res.json(rows);
         });
     });
