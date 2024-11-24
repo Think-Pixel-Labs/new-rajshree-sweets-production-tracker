@@ -81,7 +81,7 @@ function createWindow() {
             params = [startDate, endDate];
         }
 
-        query += ' ORDER BY p.name ASC, pl.createdAt DESC';
+        query += ' ORDER BY datetime(pl.createdAt) DESC';
 
         db.all(query, params, (err, rows) => {
             if (err) {
