@@ -76,10 +76,12 @@ function createWindow() {
         });
     });
 
-    const server = serverApp.listen(0, () => {
-        const port = server.address().port;
-        mainWindow.loadURL(`http://localhost:${port}`);
-    });
+    setTimeout(() => {
+        const server = serverApp.listen(0, () => {
+            const port = server.address().port;
+            mainWindow.loadURL(`http://localhost:${port}`);
+        });
+    }, 1000);
 
     mainWindow.on('closed', () => mainWindow = null);
     checkForUpdates();
