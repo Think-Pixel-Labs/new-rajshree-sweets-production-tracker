@@ -24,11 +24,7 @@ function initializeDatabase() {
 
         db.run(`CREATE TABLE IF NOT EXISTS products (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            categoryId INTEGER,
-            unitId INTEGER,
-            FOREIGN KEY (categoryId) REFERENCES categories(id),
-            FOREIGN KEY (unitId) REFERENCES units(id)
+            name TEXT NOT NULL
         )`);
 
         // Modified production log table to include all fields independently

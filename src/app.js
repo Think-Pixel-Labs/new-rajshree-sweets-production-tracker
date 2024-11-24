@@ -70,16 +70,9 @@ function createWindow() {
         let query = `
             SELECT 
                 pl.*,
-                p.name as productName,
-                p.unitId as defaultUnitId,
-                u_default.name as defaultUnitName,
-                u_log.name as logUnitName,
-                mu.name as manufacturingUnitName
+                p.name as productName
             FROM productionLog pl
             LEFT JOIN products p ON pl.productId = p.id
-            LEFT JOIN units u_default ON p.unitId = u_default.id
-            LEFT JOIN units u_log ON pl.unitId = u_log.id
-            LEFT JOIN manufacturingUnits mu ON pl.manufacturedByUnitId = mu.id
         `;
         let params = [];
 
@@ -131,15 +124,8 @@ function createWindow() {
         const query = `
             SELECT 
                 p.id, 
-                p.name, 
-                p.categoryId,
-                c.name as categoryName, 
-                p.unitId,
-                u.name as unitName,
-                u.id as defaultUnitId 
+                p.name
             FROM products p 
-            LEFT JOIN units u ON p.unitId = u.id
-            LEFT JOIN categories c ON p.categoryId = c.id
             ORDER BY p.id`;
 
         db.all(query, (err, rows) => {
@@ -194,14 +180,8 @@ function createWindow() {
         const query = `
             SELECT 
                 p.id, 
-                p.name, 
-                p.categoryId,
-                c.name as categoryName, 
-                p.unitId as defaultUnitId,
-                u.name as defaultUnitName
+                p.name
             FROM products p 
-            LEFT JOIN units u ON p.unitId = u.id
-            LEFT JOIN categories c ON p.categoryId = c.id
             WHERE p.id = ?`;
 
         db.get(query, [id], (err, product) => {
