@@ -565,7 +565,19 @@
 
         document.getElementById('filterButton').addEventListener('click', fetchProductionData);
 
+        function setDefaultDates() {
+            const today = new Date().toISOString().split('T')[0];  // Format: YYYY-MM-DD
+
+            // Set default dates for range
+            document.getElementById('startDate').value = today;
+            document.getElementById('endDate').value = today;
+
+            // Set default date for summary exports
+            document.getElementById('summaryDate').value = today;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            setDefaultDates();
             fetchProducts();
             fetchProductionData();
 
