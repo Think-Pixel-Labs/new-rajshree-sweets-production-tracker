@@ -220,6 +220,25 @@
             white-space: normal;
             min-width: 100px;
         }
+
+        .export-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #ddd;
+            width: 100%;
+        }
+
+        .export-controls button {
+            background-color: #28a745;
+            /* Green color for export buttons */
+        }
+
+        .export-controls button:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 
@@ -272,11 +291,19 @@
                 <label for="endDate">End Date:</label>
                 <input type="date" id="endDate">
                 <button id="filterButton">Filter</button>
-                <button id="exportButton" onclick="exportProductionLogs()">Export to CSV</button>
+                <button id="exportButton" onclick="exportProductionLogs()">Export Logs</button>
+
+                <div class="export-controls">
+                    <label for="summaryDate">Select Date:</label>
+                    <input type="date" id="summaryDate">
+                    <button onclick="exportCategorySummary()">Export Category Summary</button>
+                    <button onclick="exportManufacturingSummary()">Export Manufacturing Summary</button>
+                </div>
             </div>
             <table id="productionTable">
                 <thead>
                     <tr>
+                        <th>ID</th>
                         <th>Created At</th>
                         <th>Product</th>
                         <th>Quantity</th>
@@ -424,17 +451,17 @@
 
         function formatDateTimeIndian(dateString) {
             const date = new Date(dateString);
+            const options = {
+                timeZone: 'Asia/Kolkata',
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            };
 
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
-            const year = date.getFullYear();
-            let hours = date.getHours();
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; // the hour '0' should be '12'
-            const timeString = `${hours}:${minutes} ${ampm}`;
-            return `${day}-${month}-${year} ${timeString}`;
+            return new Intl.DateTimeFormat('en-IN', options).format(date);
         }
 
         async function fetchProductionData() {
@@ -450,15 +477,16 @@
             tbody.innerHTML = '';
             data.forEach(item => {
                 const row = tbody.insertRow();
-                row.insertCell(0).textContent = formatDateTimeIndian(item.createdAt);
-                row.insertCell(1).textContent = products.find(p => p.id == item.productId)?.name || 'Unknown';
-                row.insertCell(2).textContent = item.quantityManufactured;
-                row.insertCell(3).textContent = item.unitName || 'Unknown';
-                row.insertCell(4).textContent = manufacturingUnits.find(u => u.id == item.manufacturedByUnitId)?.name || 'Unknown';
-                row.insertCell(5).textContent = item.updationReason || '-';
-                row.insertCell(6).textContent = item.updatedAt ? formatDateTimeIndian(item.updatedAt) : '-';
+                row.insertCell(0).textContent = item.id;
+                row.insertCell(1).textContent = formatDateTimeIndian(item.createdAt);
+                row.insertCell(2).textContent = products.find(p => p.id == item.productId)?.name || 'Unknown';
+                row.insertCell(3).textContent = item.quantityManufactured;
+                row.insertCell(4).textContent = item.unitName || 'Unknown';
+                row.insertCell(5).textContent = manufacturingUnits.find(u => u.id == item.manufacturedByUnitId)?.name || 'Unknown';
+                row.insertCell(6).textContent = item.updationReason || '-';
+                row.insertCell(7).textContent = item.updatedAt ? formatDateTimeIndian(item.updatedAt) : '-';
 
-                const actionsCell = row.insertCell(7);
+                const actionsCell = row.insertCell(8);
                 actionsCell.className = 'actions-cell';
 
                 const editButton = document.createElement('button');
@@ -630,6 +658,70 @@
             } catch (error) {
                 console.error('Delete failed:', error);
                 alert('Failed to delete the production log. Please try again.');
+            }
+        }
+
+        async function exportCategorySummary() {
+            const summaryDate = document.getElementById('summaryDate').value;
+            if (!summaryDate) {
+                alert('Please select a date for the summary');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/export-category-summary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ date: summaryDate })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('Category summary exported successfully!');
+                } else {
+                    alert(result.message || 'Export failed');
+                }
+            } catch (error) {
+                console.error('Export failed:', error);
+                alert('Failed to export category summary. Please try again.');
+            }
+        }
+
+        async function exportManufacturingSummary() {
+            const summaryDate = document.getElementById('summaryDate').value;
+            if (!summaryDate) {
+                alert('Please select a date for the summary');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/export-manufacturing-summary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ date: summaryDate })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('Manufacturing summary exported successfully!');
+                } else {
+                    alert(result.message || 'Export failed');
+                }
+            } catch (error) {
+                console.error('Export failed:', error);
+                alert('Failed to export manufacturing summary. Please try again.');
             }
         }
     </script>

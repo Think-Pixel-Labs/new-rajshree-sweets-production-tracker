@@ -47,8 +47,10 @@ function createWindow() {
                 unitId,
                 unitName,
                 manufacturedByUnitId,
-                manufacturingUnitName
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+                manufacturingUnitName,
+                createdAt,
+                updatedAt
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ${db.getCurrentISTDateTime()}, ${db.getCurrentISTDateTime()})`,
             [
                 productId,
                 productName,
@@ -111,7 +113,7 @@ function createWindow() {
                  unitName = ?,
                  manufacturedByUnitId = ?, 
                  updationReason = ?, 
-                 updatedAt = CURRENT_TIMESTAMP 
+                 updatedAt = ${db.getCurrentISTDateTime()}
              WHERE id = ?`,
             [quantityManufactured, unitId, unitName, manufacturedByUnitId, updationReason, id],
             function (err) {
@@ -234,6 +236,7 @@ function createWindow() {
             try {
                 // Format the data for CSV with separate quantity and unit columns
                 const csvData = rows.map(row => ({
+                    'ID': row.id,
                     'Date': new Date(row.createdAt).toLocaleString(),
                     'Product': row.productName,
                     'Quantity': row.quantityManufactured,
@@ -282,6 +285,124 @@ function createWindow() {
         db.run('DELETE FROM productionLog WHERE id = ?', [id], function (err) {
             if (err) return res.status(500).json({ error: err.message });
             res.json({ success: true });
+        });
+    });
+
+    serverApp.post('/api/export-category-summary', async (req, res) => {
+        const { date } = req.body;
+
+        const query = `
+            SELECT 
+                pl.categoryName,
+                SUM(pl.quantityManufactured) as totalQuantity,
+                pl.unitName,
+                date(pl.createdAt) as productionDate,
+                GROUP_CONCAT(pl.id) as logIds
+            FROM productionLog pl
+            WHERE date(pl.createdAt) = ?
+            GROUP BY pl.categoryName, pl.unitName
+            ORDER BY pl.categoryName
+        `;
+
+        db.all(query, [date], async (err, rows) => {
+            if (err) {
+                console.error('Category summary retrieval error:', err);
+                return res.status(500).json({ error: 'An error occurred while processing your request' });
+            }
+
+            try {
+                const csvData = rows.map(row => ({
+                    'Date': new Date(row.productionDate).toLocaleDateString(),
+                    'Category': row.categoryName,
+                    'Total Quantity': row.totalQuantity,
+                    'Unit': row.unitName,
+                    'Log IDs': row.logIds
+                }));
+
+                const result = await dialog.showSaveDialog(mainWindow, {
+                    title: 'Save Category Summary',
+                    defaultPath: `category_summary_${date}.csv`,
+                    filters: [{ name: 'CSV Files', extensions: ['csv'] }]
+                });
+
+                if (!result.canceled && result.filePath) {
+                    const ws = fs.createWriteStream(result.filePath);
+                    fastcsv
+                        .write(csvData, { headers: true })
+                        .pipe(ws)
+                        .on('finish', () => {
+                            res.json({ success: true, path: result.filePath });
+                        })
+                        .on('error', (error) => {
+                            console.error('CSV write error:', error);
+                            res.status(500).json({ error: 'Failed to write CSV file' });
+                        });
+                } else {
+                    res.json({ success: false, message: 'Export cancelled' });
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                res.status(500).json({ error: 'Failed to export data' });
+            }
+        });
+    });
+
+    serverApp.post('/api/export-manufacturing-summary', async (req, res) => {
+        const { date } = req.body;
+
+        const query = `
+            SELECT 
+                pl.manufacturingUnitName,
+                SUM(pl.quantityManufactured) as totalQuantity,
+                pl.unitName,
+                date(pl.createdAt) as productionDate,
+                GROUP_CONCAT(pl.id) as logIds
+            FROM productionLog pl
+            WHERE date(pl.createdAt) = ?
+            GROUP BY pl.manufacturingUnitName, pl.unitName
+            ORDER BY pl.manufacturingUnitName
+        `;
+
+        db.all(query, [date], async (err, rows) => {
+            if (err) {
+                console.error('Manufacturing summary retrieval error:', err);
+                return res.status(500).json({ error: 'An error occurred while processing your request' });
+            }
+
+            try {
+                const csvData = rows.map(row => ({
+                    'Date': new Date(row.productionDate).toLocaleDateString(),
+                    'Manufacturing Unit': row.manufacturingUnitName,
+                    'Total Quantity': row.totalQuantity,
+                    'Unit': row.unitName,
+                    'Log IDs': row.logIds
+                }));
+
+                const result = await dialog.showSaveDialog(mainWindow, {
+                    title: 'Save Manufacturing Summary',
+                    defaultPath: `manufacturing_summary_${date}.csv`,
+                    filters: [{ name: 'CSV Files', extensions: ['csv'] }]
+                });
+
+                if (!result.canceled && result.filePath) {
+                    const ws = fs.createWriteStream(result.filePath);
+                    fastcsv
+                        .write(csvData, { headers: true })
+                        .pipe(ws)
+                        .on('finish', () => {
+                            res.json({ success: true, path: result.filePath });
+                        })
+                        .on('error', (error) => {
+                            console.error('CSV write error:', error);
+                            res.status(500).json({ error: 'Failed to write CSV file' });
+                        });
+                } else {
+                    res.json({ success: false, message: 'Export cancelled' });
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                res.status(500).json({ error: 'Failed to export data' });
+            }
         });
     });
 
