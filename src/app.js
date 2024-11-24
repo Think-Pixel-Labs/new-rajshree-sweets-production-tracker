@@ -3,17 +3,14 @@ const path = require('path');
 const { autoUpdater } = require('electron-updater');
 const express = require('express');
 const serverApp = express();
-const dbPath = getDatabasePath();
-console.log('Database Path:', dbPath);
-const db = require('./database')(dbPath);
-const fastcsv = require('fast-csv');
 const fs = require('fs');
 
 let mainWindow;
+let db;
 
 function getDatabasePath() {
     if (app.isPackaged) {
-        return path.join(process.resourcesPath, 'resources', 'production.db');
+        return path.join(process.resourcesPath, 'production.db');
     }
     return path.join(__dirname, '..', 'data', 'production.db');
 }
@@ -30,6 +27,18 @@ function checkForUpdates() {
 }
 
 function createWindow() {
+    const dbPath = getDatabasePath();
+    console.log('Database Path:', dbPath);
+
+    // Check if database file exists
+    if (!fs.existsSync(dbPath)) {
+        console.error('Database file not found at:', dbPath);
+        app.quit();
+        return;
+    }
+
+    db = require('./database')(dbPath);
+
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,

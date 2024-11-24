@@ -8,7 +8,8 @@
     "server": "node server.js",
     "dev": "nodemon --watch . --exec electron ./src/app.js",
     "build:win": "electron-builder build --win --publish never",
-    "deploy:win": "electron-builder build --win --publish always"
+    "deploy:win": "electron-builder build --win --publish always",
+    "postinstall": "electron-builder install-app-deps"
   },
   "repository": {
     "type": "git",
@@ -48,8 +49,8 @@
       ],
       "extraResources": [
         {
-          "from": "./data/production.db",
-          "to": "./resources/production.db"
+          "from": "data/production.db",
+          "to": "production.db"
         },
         {
           "from": "public",
@@ -59,8 +60,8 @@
     },
     "extraResources": [
       {
-        "from": "./data/production.db",
-        "to": "./resources/production.db"
+        "from": "data/production.db",
+        "to": "production.db"
       },
       {
         "from": "public",
