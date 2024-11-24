@@ -28,22 +28,6 @@ function initializeDatabase() {
             updationReason TEXT,
             FOREIGN KEY (productId) REFERENCES products(id)
         )`);
-
-        // Insert some sample products
-        const sampleProducts = [
-            ['Product 1', 'Category 1', 'KG'],
-            ['Product 2', 'Category 1', 'Box'],
-            ['Product 3', 'Category 2', 'Pcs'],
-            ['Product 4', 'Category 2', 'Bottle']
-        ];
-
-        const insertProduct = db.prepare('INSERT INTO products (name, category, unitType) VALUES (?, ?, ?)');
-        sampleProducts.forEach(product => {
-            insertProduct.run(product, (err) => {
-                if (err) console.error('Error inserting sample product:', err);
-            });
-        });
-        insertProduct.finalize();
     });
 }
 
