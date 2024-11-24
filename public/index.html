@@ -102,7 +102,12 @@
                 <div class="form-group">
                     <label for="quantity">Quantity:</label>
                     <input type="number" id="quantity" required>
-                    <span id="unitType"></span>
+                </div>
+                <div class="form-group">
+                    <label for="unitSelect">Unit Type:</label>
+                    <select id="unitSelect" required>
+                        <option value="">Select a unit</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="manufacturingUnitSelect">Manufacturing Unit:</label>
@@ -165,6 +170,7 @@
     <script>
         let products = [];
         let manufacturingUnits = [];
+        let units = [];
 
         async function fetchProducts() {
             const response = await fetch('/api/products');
@@ -192,6 +198,19 @@
             });
         }
 
+        async function fetchUnits() {
+            const response = await fetch('/api/units');
+            units = await response.json();
+            const unitSelect = document.getElementById('unitSelect');
+            unitSelect.innerHTML = '<option value="">Select a unit</option>';
+            units.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit.id;
+                option.textContent = unit.name;
+                unitSelect.appendChild(option);
+            });
+        }
+
         document.getElementById('productSelect').addEventListener('change', function () {
             const selectedProduct = products.find(p => p.id == this.value);
             if (selectedProduct) {
@@ -206,13 +225,19 @@
             const productId = document.getElementById('productSelect').value;
             const quantityManufactured = document.getElementById('quantity').value;
             const manufacturedByUnitId = document.getElementById('manufacturingUnitSelect').value;
+            const unitId = document.getElementById('unitSelect').value;
 
             const response = await fetch('/api/production', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ productId, quantityManufactured, manufacturedByUnitId }),
+                body: JSON.stringify({
+                    productId,
+                    quantityManufactured,
+                    manufacturedByUnitId,
+                    unitId
+                }),
             });
 
             if (response.ok) {
@@ -253,7 +278,7 @@
                 const row = tbody.insertRow();
                 row.insertCell(0).textContent = formatDateTimeIndian(item.createdAt);
                 row.insertCell(1).textContent = products.find(p => p.id == item.productId)?.name || 'Unknown';
-                row.insertCell(2).textContent = `${item.quantityManufactured} ${products.find(p => p.id == item.productId)?.unit || ''}`;
+                row.insertCell(2).textContent = `${item.quantityManufactured} ${units.find(u => u.id == item.unitId)?.name || ''}`;
                 row.insertCell(3).textContent = manufacturingUnits.find(u => u.id == item.manufacturedByUnitId)?.name || 'Unknown';
                 row.insertCell(4).textContent = item.updationReason || '-';
                 row.insertCell(5).textContent = item.updatedAt ? formatDateTimeIndian(item.updatedAt) : '-';
@@ -334,6 +359,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchProducts();
             fetchManufacturingUnits();
+            fetchUnits();
             fetchProductionData();
         });
     </script>
