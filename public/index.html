@@ -133,6 +133,7 @@
                 <label for="endDate">End Date:</label>
                 <input type="date" id="endDate">
                 <button id="filterButton">Filter</button>
+                <button id="exportButton" onclick="exportProductionLogs()">Export to CSV</button>
             </div>
             <table id="productionTable">
                 <thead>
@@ -392,6 +393,41 @@
             fetchCategories();
             fetchProductionData();
         });
+
+        async function exportProductionLogs() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            if (!startDate || !endDate) {
+                alert("Please select both start and end dates before exporting");
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/export-production-logs', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ startDate, endDate })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('Production logs exported successfully!');
+                } else {
+                    alert(result.message || 'Export cancelled');
+                }
+            } catch (error) {
+                console.error('Export failed:', error);
+                alert('Failed to export production logs. Please try again.');
+            }
+        }
     </script>
 </body>
 

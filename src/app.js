@@ -1,8 +1,10 @@
-const { app, BrowserWindow, globalShortcut } = require('electron');
+const { app, BrowserWindow, globalShortcut, dialog } = require('electron');
 const { autoUpdater } = require('electron-updater');
 const express = require('express');
 const serverApp = express();
 const db = require('./database');
+const fastcsv = require('fast-csv');
+const fs = require('fs');
 
 let mainWindow;
 
@@ -197,6 +199,70 @@ function createWindow() {
         });
     });
 
+    serverApp.post('/api/export-production-logs', async (req, res) => {
+        const { startDate, endDate } = req.body;
+
+        const query = `
+            SELECT 
+                pl.*,
+                p.name as productName
+            FROM productionLog pl
+            LEFT JOIN products p ON pl.productId = p.id
+            WHERE date(pl.createdAt) BETWEEN ? AND ?
+            ORDER BY datetime(pl.createdAt) DESC
+        `;
+
+        db.all(query, [startDate, endDate], async (err, rows) => {
+            if (err) {
+                console.error('Production log retrieval error:', err);
+                return res.status(500).json({ error: 'An error occurred while processing your request' });
+            }
+
+            try {
+                // Format the data for CSV
+                const csvData = rows.map(row => ({
+                    'Date': new Date(row.createdAt).toLocaleString(),
+                    'Product': row.productName,
+                    'Quantity': row.quantityManufactured,
+                    'Unit': row.unitName,
+                    'Manufacturing Unit': row.manufacturingUnitName,
+                    'Category': row.categoryName,
+                    'Update Reason': row.updationReason || '',
+                    'Last Updated': row.updatedAt ? new Date(row.updatedAt).toLocaleString() : ''
+                }));
+
+                // Show save dialog
+                const result = await dialog.showSaveDialog(mainWindow, {
+                    title: 'Save Production Logs',
+                    defaultPath: `production_logs_${startDate}_to_${endDate}.csv`,
+                    filters: [
+                        { name: 'CSV Files', extensions: ['csv'] }
+                    ]
+                });
+
+                if (!result.canceled && result.filePath) {
+                    // Write to CSV file
+                    const ws = fs.createWriteStream(result.filePath);
+                    fastcsv
+                        .write(csvData, { headers: true })
+                        .pipe(ws)
+                        .on('finish', () => {
+                            res.json({ success: true, path: result.filePath });
+                        })
+                        .on('error', (error) => {
+                            console.error('CSV write error:', error);
+                            res.status(500).json({ error: 'Failed to write CSV file' });
+                        });
+                } else {
+                    res.json({ success: false, message: 'Export cancelled' });
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                res.status(500).json({ error: 'Failed to export data' });
+            }
+        });
+    });
+
     setTimeout(() => {
         const server = serverApp.listen(0, () => {
             const port = server.address().port;
@@ -206,6 +272,13 @@ function createWindow() {
 
     mainWindow.on('closed', () => mainWindow = null);
     checkForUpdates();
+
+    mainWindow.webContents.on('ipc-message', async (event, channel, ...args) => {
+        if (channel === 'export-production-logs') {
+            const { startDate, endDate } = args[0];
+            // Handle the export request
+        }
+    });
 }
 
 app.on('ready', () => {

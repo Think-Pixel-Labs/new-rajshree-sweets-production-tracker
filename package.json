@@ -21,12 +21,13 @@
   "license": "ISC",
   "description": "Production tracker for New Rajshree Sweets",
   "dependencies": {
-    "sqlite3": "^5.1.7",
     "csvtojson": "^2.0.10",
     "electron-updater": "^6.2.1",
     "express": "^4.19.2",
+    "fast-csv": "^5.0.2",
     "jsonwebtoken": "^9.0.2",
-    "moment-timezone": "^0.5.45"
+    "moment-timezone": "^0.5.45",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "electron": "^32.0.1",
