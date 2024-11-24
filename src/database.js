@@ -4,54 +4,36 @@ const fs = require('fs');
 
 const db = new sqlite3.Database(path.join(__dirname, '..', 'data', 'production.db'));
 
-// Function to get current IST datetime
 function getCurrentISTDateTime() {
     return `datetime('now', '+5 hours', '+30 minutes')`;
 }
 
 function initializeDatabase() {
     db.serialize(() => {
-        // All tables without any foreign key constraints
-        db.run(`CREATE TABLE IF NOT EXISTS units (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE
-        )`);
-
-        db.run(`CREATE TABLE IF NOT EXISTS categories (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE
-        )`);
-
-        db.run(`CREATE TABLE IF NOT EXISTS manufacturingUnits (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE
-        )`);
-
+        // Products table with direct category field
         db.run(`CREATE TABLE IF NOT EXISTS products (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL
+            name TEXT NOT NULL,
+            category TEXT NOT NULL,
+            unitType TEXT CHECK(unitType IN ('KG', 'Box', 'Pcs', 'Bottle')) NOT NULL
         )`);
 
-        // Modified production log table to use IST timestamps
+        // Simplified production log table
         db.run(`CREATE TABLE IF NOT EXISTS productionLog (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            productId INTEGER,
-            productName TEXT,
-            categoryId INTEGER,
-            categoryName TEXT,
-            quantityManufactured REAL,
-            unitId INTEGER,
-            unitName TEXT,
-            manufacturedByUnitId INTEGER,
-            manufacturingUnitName TEXT,
-            updationReason TEXT,
+            productId INTEGER NOT NULL,
+            productName TEXT NOT NULL,
+            category TEXT NOT NULL,
+            quantityManufactured REAL NOT NULL,
+            unitType TEXT NOT NULL,
             createdAt DATETIME DEFAULT (${getCurrentISTDateTime()}),
-            updatedAt DATETIME DEFAULT (${getCurrentISTDateTime()})
+            updatedAt DATETIME DEFAULT (${getCurrentISTDateTime()}),
+            updationReason TEXT,
+            FOREIGN KEY (productId) REFERENCES products(id)
         )`);
     });
 }
 
-// Add this function to the exports
 db.getCurrentISTDateTime = getCurrentISTDateTime;
 
 initializeDatabase();

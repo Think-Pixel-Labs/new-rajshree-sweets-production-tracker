@@ -258,26 +258,9 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="categorySelect">Category:</label>
-                    <select id="categorySelect" required>
-                        <option value="">Select a category</option>
-                    </select>
-                </div>
-                <div class="form-group">
                     <label for="quantity">Quantity:</label>
                     <input type="number" id="quantity" required>
-                </div>
-                <div class="form-group">
-                    <label for="unitSelect">Unit Type:</label>
-                    <select id="unitSelect" required>
-                        <option value="">Select a unit</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="manufacturingUnitSelect">Manufacturing Unit:</label>
-                    <select id="manufacturingUnitSelect" required>
-                        <option value="">Select a manufacturing unit</option>
-                    </select>
+                    <span id="unitTypeDisplay"></span>
                 </div>
                 <button type="submit">Add Production Log</button>
             </form>
@@ -308,7 +291,7 @@
                         <th>Product</th>
                         <th>Quantity</th>
                         <th>Unit Type</th>
-                        <th>Manufacturing Unit</th>
+                        <th>Category</th>
                         <th>Updation Reason</th>
                         <th>Updated At</th>
                         <th>Actions</th>
@@ -389,39 +372,20 @@
             });
         }
 
-        async function fetchCategories() {
-            const response = await fetch('/api/categories');
-            const categories = await response.json();
-            const categorySelect = document.getElementById('categorySelect');
-            categorySelect.innerHTML = '<option value="">Select a category</option>';
-            categories.forEach(category => {
-                const option = document.createElement('option');
-                option.value = category.id;
-                option.textContent = category.name;
-                categorySelect.appendChild(option);
-            });
-        }
-
         document.getElementById('productSelect').addEventListener('change', function () {
             const selectedProduct = products.find(p => p.id == this.value);
             if (selectedProduct) {
-                document.getElementById('unitType').textContent = selectedProduct.unit;
+                document.getElementById('unitTypeDisplay').textContent = selectedProduct.unitType;
             } else {
-                document.getElementById('unitType').textContent = '';
+                document.getElementById('unitTypeDisplay').textContent = '';
             }
         });
 
         document.getElementById('productionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const productId = document.getElementById('productSelect').value;
-            const productName = document.getElementById('productSelect').options[document.getElementById('productSelect').selectedIndex].text;
-            const categoryId = document.getElementById('categorySelect').value;
-            const categoryName = document.getElementById('categorySelect').options[document.getElementById('categorySelect').selectedIndex].text;
+            const selectedProduct = products.find(p => p.id == productId);
             const quantityManufactured = document.getElementById('quantity').value;
-            const unitId = document.getElementById('unitSelect').value;
-            const unitName = document.getElementById('unitSelect').options[document.getElementById('unitSelect').selectedIndex].text;
-            const manufacturedByUnitId = document.getElementById('manufacturingUnitSelect').value;
-            const manufacturingUnitName = document.getElementById('manufacturingUnitSelect').options[document.getElementById('manufacturingUnitSelect').selectedIndex].text;
 
             const response = await fetch('/api/production', {
                 method: 'POST',
@@ -430,14 +394,10 @@
                 },
                 body: JSON.stringify({
                     productId,
-                    productName,
-                    categoryId,
-                    categoryName,
+                    productName: selectedProduct.name,
+                    category: selectedProduct.category,
                     quantityManufactured,
-                    unitId,
-                    unitName,
-                    manufacturedByUnitId,
-                    manufacturingUnitName
+                    unitType: selectedProduct.unitType
                 }),
             });
 
@@ -479,10 +439,10 @@
                 const row = tbody.insertRow();
                 row.insertCell(0).textContent = item.id;
                 row.insertCell(1).textContent = formatDateTimeIndian(item.createdAt);
-                row.insertCell(2).textContent = products.find(p => p.id == item.productId)?.name || 'Unknown';
+                row.insertCell(2).textContent = item.productName;
                 row.insertCell(3).textContent = item.quantityManufactured;
-                row.insertCell(4).textContent = item.unitName || 'Unknown';
-                row.insertCell(5).textContent = manufacturingUnits.find(u => u.id == item.manufacturedByUnitId)?.name || 'Unknown';
+                row.insertCell(4).textContent = item.unitType;
+                row.insertCell(5).textContent = item.category;
                 row.insertCell(6).textContent = item.updationReason || '-';
                 row.insertCell(7).textContent = item.updatedAt ? formatDateTimeIndian(item.updatedAt) : '-';
 
@@ -592,7 +552,6 @@
             fetchProducts();
             fetchManufacturingUnits();
             fetchUnits();
-            fetchCategories();
             fetchProductionData();
         });
 

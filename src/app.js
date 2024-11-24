@@ -28,39 +28,27 @@ function createWindow() {
         const {
             productId,
             productName,
-            categoryId,
-            categoryName,
+            category,
             quantityManufactured,
-            unitId,
-            unitName,
-            manufacturedByUnitId,
-            manufacturingUnitName
+            unitType
         } = req.body;
 
         db.run(
             `INSERT INTO productionLog (
                 productId,
                 productName,
-                categoryId,
-                categoryName,
+                category,
                 quantityManufactured,
-                unitId,
-                unitName,
-                manufacturedByUnitId,
-                manufacturingUnitName,
+                unitType,
                 createdAt,
                 updatedAt
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ${db.getCurrentISTDateTime()}, ${db.getCurrentISTDateTime()})`,
+            ) VALUES (?, ?, ?, ?, ?, ${db.getCurrentISTDateTime()}, ${db.getCurrentISTDateTime()})`,
             [
                 productId,
                 productName,
-                categoryId,
-                categoryName,
+                category,
                 quantityManufactured,
-                unitId,
-                unitName,
-                manufacturedByUnitId,
-                manufacturingUnitName
+                unitType
             ],
             function (err) {
                 if (err) return res.status(500).json({ error: err.message });
@@ -74,7 +62,8 @@ function createWindow() {
         let query = `
             SELECT 
                 pl.*,
-                p.name as productName
+                p.name as productName,
+                p.unitType
             FROM productionLog pl
             LEFT JOIN products p ON pl.productId = p.id
         `;
@@ -100,22 +89,18 @@ function createWindow() {
         const { id } = req.params;
         const {
             quantityManufactured,
-            unitId,
-            unitName,
-            manufacturedByUnitId,
+            unitType,
             updationReason
         } = req.body;
 
         db.run(
             `UPDATE productionLog 
              SET quantityManufactured = ?, 
-                 unitId = ?, 
-                 unitName = ?,
-                 manufacturedByUnitId = ?, 
+                 unitType = ?, 
                  updationReason = ?, 
                  updatedAt = ${db.getCurrentISTDateTime()}
              WHERE id = ?`,
-            [quantityManufactured, unitId, unitName, manufacturedByUnitId, updationReason, id],
+            [quantityManufactured, unitType, updationReason, id],
             function (err) {
                 if (err) return res.status(500).json({ error: err.message });
                 res.json({ success: true });
@@ -123,94 +108,19 @@ function createWindow() {
         );
     });
 
-    serverApp.get('/api/units', (req, res) => {
-        db.all('SELECT * FROM units ORDER BY name ASC', (err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json(rows);
-        });
-    });
-
-    serverApp.get('/api/categories', (req, res) => {
-        db.all('SELECT * FROM categories ORDER BY name ASC', (err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json(rows);
-        });
-    });
-
     serverApp.get('/api/products', (req, res) => {
         const query = `
             SELECT 
-                p.id, 
-                p.name
-            FROM products p 
-            ORDER BY p.name ASC`;
+                id, 
+                name,
+                category,
+                unitType
+            FROM products 
+            ORDER BY name ASC`;
 
         db.all(query, (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(rows);
-        });
-    });
-
-    serverApp.get('/api/manufacturing-units', (req, res) => {
-        db.all('SELECT * FROM manufacturingUnits ORDER BY name ASC', (err, rows) => {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json(rows);
-        });
-    });
-
-    serverApp.post('/api/units', (req, res) => {
-        const { name } = req.body;
-        db.run('INSERT INTO units (name) VALUES (?)', [name], function (err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ id: this.lastID, name });
-        });
-    });
-
-    serverApp.post('/api/categories', (req, res) => {
-        const { name } = req.body;
-        db.run('INSERT INTO categories (name) VALUES (?)', [name], function (err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ id: this.lastID, name });
-        });
-    });
-
-    serverApp.put('/api/units/:id', (req, res) => {
-        const { id } = req.params;
-        const { name } = req.body;
-        db.run('UPDATE units SET name = ? WHERE id = ?', [name, id], function (err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ id, name });
-        });
-    });
-
-    serverApp.put('/api/categories/:id', (req, res) => {
-        const { id } = req.params;
-        const { name } = req.body;
-        db.run('UPDATE categories SET name = ? WHERE id = ?', [name, id], function (err) {
-            if (err) return res.status(500).json({ error: err.message });
-            res.json({ id, name });
-        });
-    });
-
-    serverApp.get('/api/products/:id', (req, res) => {
-        const { id } = req.params;
-        const query = `
-            SELECT 
-                p.id, 
-                p.name
-            FROM products p 
-            WHERE p.id = ?`;
-
-        db.get(query, [id], (err, product) => {
-            if (err) return res.status(500).json({ error: err.message });
-            if (!product) return res.status(404).json({ error: 'Product not found' });
-
-            // Get all available units
-            db.all('SELECT * FROM units ORDER BY id', (err, units) => {
-                if (err) return res.status(500).json({ error: err.message });
-                product.availableUnits = units;
-                res.json(product);
-            });
         });
     });
 
@@ -240,9 +150,8 @@ function createWindow() {
                     'Date': new Date(row.createdAt).toLocaleString(),
                     'Product': row.productName,
                     'Quantity': row.quantityManufactured,
-                    'Unit Type': row.unitName || '',  // Separate column for unit type
-                    'Manufacturing Unit': row.manufacturingUnitName,
-                    'Category': row.categoryName,
+                    'Unit Type': row.unitType || '',  // Separate column for unit type
+                    'Category': row.category,
                     'Update Reason': row.updationReason || '',
                     'Last Updated': row.updatedAt ? new Date(row.updatedAt).toLocaleString() : ''
                 }));
@@ -293,15 +202,15 @@ function createWindow() {
 
         const query = `
             SELECT 
-                pl.categoryName,
+                pl.category,
                 SUM(pl.quantityManufactured) as totalQuantity,
-                pl.unitName,
+                pl.unitType,
                 date(pl.createdAt) as productionDate,
                 GROUP_CONCAT(pl.id) as logIds
             FROM productionLog pl
             WHERE date(pl.createdAt) = ?
-            GROUP BY pl.categoryName, pl.unitName
-            ORDER BY pl.categoryName
+            GROUP BY pl.category, pl.unitType
+            ORDER BY pl.category
         `;
 
         db.all(query, [date], async (err, rows) => {
@@ -313,9 +222,9 @@ function createWindow() {
             try {
                 const csvData = rows.map(row => ({
                     'Date': new Date(row.productionDate).toLocaleDateString(),
-                    'Category': row.categoryName,
+                    'Category': row.category,
                     'Total Quantity': row.totalQuantity,
-                    'Unit': row.unitName,
+                    'Unit': row.unitType,
                     'Log IDs': row.logIds
                 }));
 
