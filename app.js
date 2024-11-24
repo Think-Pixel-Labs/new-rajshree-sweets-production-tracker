@@ -3,51 +3,25 @@ const { autoUpdater } = require('electron-updater');
 const express = require('express');
 const serverApp = express();
 const db = require('./database');
-const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = 'kosag79-8dw@*(ugjklasdn#^gaskkf';
 let mainWindow;
 
-// Add this function to check for updates
 function checkForUpdates() {
     autoUpdater.checkForUpdatesAndNotify();
 }
-
-const authMiddleware = (req, res, next) => {
-    const token = req.headers['authorization'];
-    if (!token) return res.status(401).json({ error: 'No token provided' });
-
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
-        if (err) return res.status(401).json({ error: 'Invalid token' });
-        req.user = decoded;
-        next();
-    });
-};
 
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800,
         height: 600,
-        webPreferences: { nodeIntegration: true, contextIsolation: false }
+        webPreferences: { nodeIntegration: true, contextIsolation: false },
+        title: "Production Tracker"
     });
 
     serverApp.use(express.static('public'));
     serverApp.use(express.json());
 
-    serverApp.post('/api/login', (req, res) => {
-        const { username, password } = req.body;
-        db.get('SELECT * FROM users WHERE username = ? AND password = ?', [username, password], (err, row) => {
-            if (err) return res.status(500).json({ error: err.message });
-            if (row) {
-                const token = jwt.sign({ id: row.id, role: row.role }, JWT_SECRET, { expiresIn: '1h' });
-                res.json({ success: true, token, role: row.role });
-            } else {
-                res.json({ success: false, message: 'Invalid username or password' });
-            }
-        });
-    });
-
-    serverApp.post('/api/production', authMiddleware, (req, res) => {
+    serverApp.post('/api/production', (req, res) => {
         const { productId, quantityManufactured, manufacturedByUnitId } = req.body;
         db.run('INSERT INTO productionLog (productId, quantityManufactured, manufacturedByUnitId) VALUES (?, ?, ?)',
             [productId, quantityManufactured, manufacturedByUnitId], function (err) {
@@ -56,7 +30,7 @@ function createWindow() {
             });
     });
 
-    serverApp.get('/api/production', authMiddleware, (req, res) => {
+    serverApp.get('/api/production', (req, res) => {
         const { startDate, endDate } = req.query;
         let query = 'SELECT * FROM productionLog';
         let params = [];
@@ -68,20 +42,16 @@ function createWindow() {
 
         query += ' ORDER BY createdAt DESC';
 
-        console.log('Executing query:', query);
-        console.log('Query parameters:', params);
-
         db.all(query, params, (err, rows) => {
             if (err) {
                 console.error('Production log retrieval error:', err);
                 return res.status(500).json({ error: 'An error occurred while processing your request' });
             }
-            console.log('Query results:', rows);
             res.json(rows);
         });
     });
 
-    serverApp.put('/api/production/:id', authMiddleware, (req, res) => {
+    serverApp.put('/api/production/:id', (req, res) => {
         const { id } = req.params;
         const { quantityManufactured, updationReason } = req.body;
         db.run('UPDATE productionLog SET quantityManufactured = ?, updationReason = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?',
@@ -91,14 +61,14 @@ function createWindow() {
             });
     });
 
-    serverApp.get('/api/products', authMiddleware, (req, res) => {
+    serverApp.get('/api/products', (req, res) => {
         db.all('SELECT p.id, p.name, p.categoryId, u.name as unit FROM products p JOIN units u ON p.unitId = u.id', (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(rows);
         });
     });
 
-    serverApp.get('/api/manufacturing-units', authMiddleware, (req, res) => {
+    serverApp.get('/api/manufacturing-units', (req, res) => {
         db.all('SELECT * FROM manufacturingUnits', (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(rows);
@@ -111,8 +81,6 @@ function createWindow() {
     });
 
     mainWindow.on('closed', () => mainWindow = null);
-
-    // Check for updates
     checkForUpdates();
 }
 
@@ -123,7 +91,6 @@ app.on('ready', () => {
     });
 });
 
-// Add these event listeners for auto-update
 autoUpdater.on('update-available', () => {
     mainWindow.webContents.send('update_available');
 });

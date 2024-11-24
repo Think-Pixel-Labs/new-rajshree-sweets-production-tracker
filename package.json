@@ -1,14 +1,16 @@
 {
-  "name": "productionmanager",
+  "name": "Production Tracker",
   "version": "1.0.0",
-  "productName": "New Rajshree Sweets Production Tracker",
-  "main": "index.js",
+  "productName": "Production Tracker",
+  "main": "app.js",
   "scripts": {
     "start": "electron ./app.js",
     "server": "node server.js",
     "dev": "nodemon --watch . --exec electron ./app.js",
-    "build": "electron-builder build --win --publish never",
-    "deploy": "electron-builder build --win --publish always"
+    "build:win": "electron-builder build --win --publish never",
+    "build:mac": "electron-builder build --mac --publish never",
+    "deploy:win": "electron-builder build --win --publish always",
+    "deploy:mac": "electron-builder build --mac --publish always"
   },
   "repository": {
     "type": "git",
@@ -17,28 +19,30 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "Production management system for New Rajshree Sweets",
+  "description": "Production tracker for New Rajshree Sweets",
   "dependencies": {
+    "sqlite3": "^5.1.7",
     "csvtojson": "^2.0.10",
     "electron-updater": "^6.2.1",
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
-    "moment-timezone": "^0.5.45",
-    "better-sqlite3": "^8.0.0"
+    "moment-timezone": "^0.5.45"
   },
   "devDependencies": {
     "electron": "^32.0.1",
     "electron-builder": "^24.13.3",
     "nodemon": "^3.1.4"
   },
-    "build": {
+  "build": {
     "appId": "com.newrajshreesweets.productiontracker",
     "productName": "New Rajshree Sweets Production Tracker",
-    "publish": [{
-      "provider": "github",
-      "owner": "Think-Pixel-Digital-Media-Solutions",
-      "repo": "new-rajshree-sweets-production-tracker"
-    }],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "Think-Pixel-Digital-Media-Solutions",
+        "repo": "new-rajshree-sweets-production-tracker"
+      }
+    ],
     "win": {
       "target": [
         "nsis"

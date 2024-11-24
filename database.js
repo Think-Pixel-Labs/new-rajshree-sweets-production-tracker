@@ -1,97 +1,91 @@
-const sqlite3 = require('better-sqlite3').verbose();
-const fs = require('fs');
+const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const csv = require('csvtojson');
-const moment = require('moment-timezone');
 
-// Set the default timezone for the application
-moment.tz.setDefault('Asia/Kolkata');
-
-const dbPath = './production.db';
-
-// Check if the database file exists
-const dbExists = fs.existsSync(dbPath);
-
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) console.error(err.message);
-    console.log('Connected to the production database.');
+const db = new sqlite3.Database(path.join(__dirname, 'production.db'), (err) => {
+    if (err) {
+        console.error('Database connection error:', err);
+    } else {
+        console.log('Connected to the SQLite database.');
+        createTables();
+    }
 });
 
-// Only create tables and insert data if the database file didn't exist
-if (!dbExists) {
-    console.log('Creating tables and inserting initial data...');
-    db.serialize(() => {
-        const tables = [
-            `CREATE TABLE IF NOT EXISTS manufacturingUnits (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL
-            )`,
-            `CREATE TABLE IF NOT EXISTS products (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                categoryId INTEGER REFERENCES categories(id),
-                unitId INTEGER REFERENCES units(id)
-            )`,
-            `CREATE TABLE IF NOT EXISTS units (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL
-            )`,
-            `CREATE TABLE IF NOT EXISTS categories (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL
-            )`,
-            `CREATE TABLE IF NOT EXISTS productionLog (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                productId INTEGER,
-                manufacturedByUnitId INTEGER,
-                quantityManufactured REAL,
-                createdAt TIMESTAMP DEFAULT (datetime('now', 'localtime')),
-                updatedAt TIMESTAMP DEFAULT (datetime('now', 'localtime')),
-                updationReason TEXT,
-                FOREIGN KEY (productId) REFERENCES products(id),
-                FOREIGN KEY (manufacturedByUnitId) REFERENCES manufacturingUnits(id)
-            )`,
-            `CREATE TABLE IF NOT EXISTS users (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                username TEXT NOT NULL,
-                password TEXT NOT NULL,
-                role TEXT NOT NULL
-            )`
-        ];
+function createTables() {
+    // Create tables if they don't exist
+    const tables = `
+        CREATE TABLE IF NOT EXISTS units (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL
+        );
 
-        tables.forEach(table => db.run(table));
+        CREATE TABLE IF NOT EXISTS categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL
+        );
 
-        const dataDir = path.join(__dirname, 'public', 'data');
-        const csvFiles = [
-            { file: 'ManufacturingUnits.csv', table: 'manufacturingUnits', columns: ['id', 'name'] },
-            { file: 'Categories.csv', table: 'categories', columns: ['id', 'name'] },
-            { file: 'Units.csv', table: 'units', columns: ['id', 'name'] },
-            { file: 'Products.csv', table: 'products', columns: ['name', 'categoryId', 'unitId'] },
-            { file: 'Users.csv', table: 'users', columns: ['username', 'password', 'role'] }
-        ];
+        CREATE TABLE IF NOT EXISTS products (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            categoryId INTEGER,
+            unitId INTEGER,
+            FOREIGN KEY (categoryId) REFERENCES categories(id),
+            FOREIGN KEY (unitId) REFERENCES units(id)
+        );
 
-        csvFiles.forEach(({ file, table, columns }) => {
-            csv()
-                .fromFile(path.join(dataDir, file))
-                .then((data) => {
-                    const stmt = db.prepare(`INSERT INTO ${table} (${columns.join(',')}) VALUES (${columns.map(() => '?').join(',')})`);
-                    data.forEach((row) => stmt.run(columns.map(col => row[col])));
-                    stmt.finalize();
-                    console.log(`Data inserted into ${table}`);
-                })
-                .catch(err => console.error(`Error inserting data into ${table}:`, err));
-        });
+        CREATE TABLE IF NOT EXISTS manufacturingUnits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS productionLog (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            productId INTEGER,
+            quantityManufactured REAL NOT NULL,
+            manufacturedByUnitId INTEGER,
+            updationReason TEXT,
+            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updatedAt DATETIME,
+            FOREIGN KEY (productId) REFERENCES products(id),
+            FOREIGN KEY (manufacturedByUnitId) REFERENCES manufacturingUnits(id)
+        );
+    `;
+
+    db.exec(tables, (err) => {
+        if (err) {
+            console.error('Error creating tables:', err);
+        } else {
+            console.log('Database tables created successfully');
+        }
     });
-} else {
-    console.log('Database file already exists. Skipping table creation and data insertion.');
 }
 
-// Add this function to ensure all date operations use IST
-db.getIST = () => {
-    return new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+// Promisify database operations
+function run(sql, params = []) {
+    return new Promise((resolve, reject) => {
+        db.run(sql, params, function (err) {
+            if (err) {
+                reject(err);
+            } else {
+                resolve({ id: this.lastID });
+            }
+        });
+    });
+}
+
+function all(sql, params = []) {
+    return new Promise((resolve, reject) => {
+        db.all(sql, params, (err, rows) => {
+            if (err) {
+                reject(err);
+            } else {
+                resolve(rows);
+            }
+        });
+    });
+}
+
+module.exports = {
+    db,
+    run,
+    all
 };
-
-// Update the getISTDateTime function
-db.getISTDateTime = () => moment().format('YYYY-MM-DD HH:mm:ss');
-
-module.exports = db;
