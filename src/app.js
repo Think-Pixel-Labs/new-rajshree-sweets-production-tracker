@@ -23,25 +23,39 @@ function createWindow() {
     serverApp.use(express.json());
 
     serverApp.post('/api/production', (req, res) => {
-        const { productId, quantityManufactured, manufacturedByUnitId } = req.body;
-        db.run('INSERT INTO productionLog (productId, quantityManufactured, manufacturedByUnitId) VALUES (?, ?, ?)',
-            [productId, quantityManufactured, manufacturedByUnitId], function (err) {
+        const { productId, quantityManufactured, unitId, manufacturedByUnitId } = req.body;
+
+        db.run(
+            'INSERT INTO productionLog (productId, quantityManufactured, unitId, manufacturedByUnitId) VALUES (?, ?, ?, ?)',
+            [productId, quantityManufactured, unitId, manufacturedByUnitId],
+            function (err) {
                 if (err) return res.status(500).json({ error: err.message });
                 res.json({ id: this.lastID });
-            });
+            }
+        );
     });
 
     serverApp.get('/api/production', (req, res) => {
         const { startDate, endDate } = req.query;
-        let query = 'SELECT * FROM productionLog';
+        let query = `
+            SELECT 
+                pl.*,
+                p.name as productName,
+                u.name as unitName,
+                mu.name as manufacturingUnitName
+            FROM productionLog pl
+            LEFT JOIN products p ON pl.productId = p.id
+            LEFT JOIN units u ON pl.unitId = u.id
+            LEFT JOIN manufacturingUnits mu ON pl.manufacturedByUnitId = mu.id
+        `;
         let params = [];
 
         if (startDate && endDate) {
-            query += ' WHERE date(createdAt) BETWEEN ? AND ?';
+            query += ' WHERE date(pl.createdAt) BETWEEN ? AND ?';
             params = [startDate, endDate];
         }
 
-        query += ' ORDER BY createdAt DESC';
+        query += ' ORDER BY pl.createdAt DESC';
 
         db.all(query, params, (err, rows) => {
             if (err) {
@@ -54,25 +68,90 @@ function createWindow() {
 
     serverApp.put('/api/production/:id', (req, res) => {
         const { id } = req.params;
-        const { quantityManufactured, updationReason } = req.body;
-        db.run('UPDATE productionLog SET quantityManufactured = ?, updationReason = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?',
-            [quantityManufactured, updationReason, id], function (err) {
+        const { quantityManufactured, unitId, updationReason } = req.body;
+
+        db.run(
+            'UPDATE productionLog SET quantityManufactured = ?, unitId = ?, updationReason = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?',
+            [quantityManufactured, unitId, updationReason, id],
+            function (err) {
                 if (err) return res.status(500).json({ error: err.message });
                 res.json({ success: true });
-            });
+            }
+        );
+    });
+
+    serverApp.get('/api/units', (req, res) => {
+        db.all('SELECT * FROM units ORDER BY id', (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(rows);
+        });
+    });
+
+    serverApp.get('/api/categories', (req, res) => {
+        db.all('SELECT * FROM categories ORDER BY id', (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(rows);
+        });
     });
 
     serverApp.get('/api/products', (req, res) => {
-        db.all('SELECT p.id, p.name, p.categoryId, u.name as unit FROM products p JOIN units u ON p.unitId = u.id', (err, rows) => {
+        const query = `
+            SELECT 
+                p.id, 
+                p.name, 
+                p.categoryId,
+                c.name as categoryName, 
+                p.unitId,
+                u.name as unitName 
+            FROM products p 
+            LEFT JOIN units u ON p.unitId = u.id
+            LEFT JOIN categories c ON p.categoryId = c.id
+            ORDER BY p.id`;
+
+        db.all(query, (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(rows);
         });
     });
 
     serverApp.get('/api/manufacturing-units', (req, res) => {
-        db.all('SELECT * FROM manufacturingUnits', (err, rows) => {
+        db.all('SELECT * FROM manufacturingUnits ORDER BY id', (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(rows);
+        });
+    });
+
+    serverApp.post('/api/units', (req, res) => {
+        const { name } = req.body;
+        db.run('INSERT INTO units (name) VALUES (?)', [name], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ id: this.lastID, name });
+        });
+    });
+
+    serverApp.post('/api/categories', (req, res) => {
+        const { name } = req.body;
+        db.run('INSERT INTO categories (name) VALUES (?)', [name], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ id: this.lastID, name });
+        });
+    });
+
+    serverApp.put('/api/units/:id', (req, res) => {
+        const { id } = req.params;
+        const { name } = req.body;
+        db.run('UPDATE units SET name = ? WHERE id = ?', [name, id], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ id, name });
+        });
+    });
+
+    serverApp.put('/api/categories/:id', (req, res) => {
+        const { id } = req.params;
+        const { name } = req.body;
+        db.run('UPDATE categories SET name = ? WHERE id = ?', [name, id], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ id, name });
         });
     });
 

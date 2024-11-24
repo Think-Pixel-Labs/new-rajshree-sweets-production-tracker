@@ -2,12 +2,12 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const fs = require('fs');
 
-const db = new sqlite3.Database(path.join(__dirname, 'production.db'));
+const db = new sqlite3.Database(path.join(__dirname, '..', 'data', 'production.db'));
+const defaultData = require('../data/defaultData.json');
 
 function initializeDatabase() {
-    // Create tables if they don't exist
     db.serialize(() => {
-        // First create all necessary tables
+        // Modified tables without foreign key constraints
         db.run(`CREATE TABLE IF NOT EXISTS units (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE
@@ -28,108 +28,49 @@ function initializeDatabase() {
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             categoryId INTEGER,
-            unitId INTEGER,
-            FOREIGN KEY (categoryId) REFERENCES categories(id),
-            FOREIGN KEY (unitId) REFERENCES units(id)
+            unitId INTEGER
         )`);
 
+        // Modified production log table to include unitId
         db.run(`CREATE TABLE IF NOT EXISTS productionLog (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             productId INTEGER,
             quantityManufactured REAL,
+            unitId INTEGER,
             manufacturedByUnitId INTEGER,
             updationReason TEXT,
             createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (productId) REFERENCES products(id),
-            FOREIGN KEY (manufacturedByUnitId) REFERENCES manufacturingUnits(id)
+            updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
         )`);
 
-        // Check if default data needs to be inserted
-        db.get("SELECT COUNT(*) as count FROM units", (err, row) => {
-            if (err) {
-                console.error('Error checking units:', err);
-                return;
-            }
+        // Rest of the initialization code remains the same
+        const insertDefaultData = (tableName, data, columns) => {
+            db.get(`SELECT COUNT(*) as count FROM ${tableName}`, (err, row) => {
+                if (err) {
+                    console.error(`Error checking ${tableName}:`, err);
+                    return;
+                }
 
-            if (row.count === 0) {
-                // Insert default units
-                const defaultUnits = [
-                    ['KG'],
-                    ['Pieces'],
-                    ['Meters']
-                ];
+                if (row.count === 0) {
+                    const placeholders = '(' + columns.map(() => '?').join(',') + ')';
+                    const stmt = db.prepare(`INSERT INTO ${tableName} (${columns.join(',')}) VALUES ${placeholders}`);
 
-                const stmt = db.prepare("INSERT INTO units (name) VALUES (?)");
-                defaultUnits.forEach(unit => stmt.run(unit));
-                stmt.finalize();
-            }
-        });
+                    data.forEach(item => {
+                        const values = columns.map(col => item[col]);
+                        stmt.run(values);
+                    });
 
-        db.get("SELECT COUNT(*) as count FROM categories", (err, row) => {
-            if (err) {
-                console.error('Error checking categories:', err);
-                return;
-            }
+                    stmt.finalize();
+                }
+            });
+        };
 
-            if (row.count === 0) {
-                // Insert default categories
-                const defaultCategories = [
-                    ['Raw Materials'],
-                    ['Finished Goods'],
-                    ['Work in Progress']
-                ];
-
-                const stmt = db.prepare("INSERT INTO categories (name) VALUES (?)");
-                defaultCategories.forEach(category => stmt.run(category));
-                stmt.finalize();
-            }
-        });
-
-        db.get("SELECT COUNT(*) as count FROM manufacturingUnits", (err, row) => {
-            if (err) {
-                console.error('Error checking manufacturing units:', err);
-                return;
-            }
-
-            if (row.count === 0) {
-                // Insert default manufacturing units
-                const defaultManufacturingUnits = [
-                    ['Unit A', 'Main Production Unit'],
-                    ['Unit B', 'Secondary Production Unit'],
-                    ['Unit C', 'Assembly Unit']
-                ];
-
-                const stmt = db.prepare("INSERT INTO manufacturingUnits (name, description) VALUES (?, ?)");
-                defaultManufacturingUnits.forEach(unit => stmt.run(unit));
-                stmt.finalize();
-            }
-        });
-
-        // Add default products after categories and units are created
-        db.get("SELECT COUNT(*) as count FROM products", (err, row) => {
-            if (err) {
-                console.error('Error checking products:', err);
-                return;
-            }
-
-            if (row.count === 0) {
-                // Insert default products
-                const defaultProducts = [
-                    ['Product 1', 1, 1], // category 1, unit 1
-                    ['Product 2', 2, 2], // category 2, unit 2
-                    ['Product 3', 3, 1]  // category 3, unit 1
-                ];
-
-                const stmt = db.prepare("INSERT INTO products (name, categoryId, unitId) VALUES (?, ?, ?)");
-                defaultProducts.forEach(product => stmt.run(product));
-                stmt.finalize();
-            }
-        });
+        insertDefaultData('units', defaultData.units, ['name']);
+        insertDefaultData('categories', defaultData.categories, ['name']);
+        insertDefaultData('manufacturingUnits', defaultData.manufacturingUnits, ['name', 'description']);
+        insertDefaultData('products', defaultData.products, ['name', 'categoryId', 'unitId']);
     });
 }
 
-// Initialize database when the module is loaded
 initializeDatabase();
-
 module.exports = db;
