@@ -100,6 +100,12 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label for="categorySelect">Category:</label>
+                    <select id="categorySelect" required>
+                        <option value="">Select a category</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label for="quantity">Quantity:</label>
                     <input type="number" id="quantity" required>
                 </div>
@@ -211,6 +217,19 @@
             });
         }
 
+        async function fetchCategories() {
+            const response = await fetch('/api/categories');
+            const categories = await response.json();
+            const categorySelect = document.getElementById('categorySelect');
+            categorySelect.innerHTML = '<option value="">Select a category</option>';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                categorySelect.appendChild(option);
+            });
+        }
+
         document.getElementById('productSelect').addEventListener('change', function () {
             const selectedProduct = products.find(p => p.id == this.value);
             if (selectedProduct) {
@@ -223,9 +242,14 @@
         document.getElementById('productionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const productId = document.getElementById('productSelect').value;
+            const productName = document.getElementById('productSelect').options[document.getElementById('productSelect').selectedIndex].text;
+            const categoryId = document.getElementById('categorySelect').value;
+            const categoryName = document.getElementById('categorySelect').options[document.getElementById('categorySelect').selectedIndex].text;
             const quantityManufactured = document.getElementById('quantity').value;
-            const manufacturedByUnitId = document.getElementById('manufacturingUnitSelect').value;
             const unitId = document.getElementById('unitSelect').value;
+            const unitName = document.getElementById('unitSelect').options[document.getElementById('unitSelect').selectedIndex].text;
+            const manufacturedByUnitId = document.getElementById('manufacturingUnitSelect').value;
+            const manufacturingUnitName = document.getElementById('manufacturingUnitSelect').options[document.getElementById('manufacturingUnitSelect').selectedIndex].text;
 
             const response = await fetch('/api/production', {
                 method: 'POST',
@@ -234,9 +258,14 @@
                 },
                 body: JSON.stringify({
                     productId,
+                    productName,
+                    categoryId,
+                    categoryName,
                     quantityManufactured,
+                    unitId,
+                    unitName,
                     manufacturedByUnitId,
-                    unitId
+                    manufacturingUnitName
                 }),
             });
 
@@ -360,6 +389,7 @@
             fetchProducts();
             fetchManufacturingUnits();
             fetchUnits();
+            fetchCategories();
             fetchProductionData();
         });
     </script>

@@ -25,19 +25,39 @@ function createWindow() {
     serverApp.post('/api/production', (req, res) => {
         const {
             productId,
+            productName,
+            categoryId,
+            categoryName,
             quantityManufactured,
+            unitId,
+            unitName,
             manufacturedByUnitId,
-            unitId  // This will be the selected unit for this specific log
+            manufacturingUnitName
         } = req.body;
 
         db.run(
             `INSERT INTO productionLog (
-                productId, 
-                quantityManufactured, 
+                productId,
+                productName,
+                categoryId,
+                categoryName,
+                quantityManufactured,
+                unitId,
+                unitName,
                 manufacturedByUnitId,
-                unitId
-            ) VALUES (?, ?, ?, ?)`,
-            [productId, quantityManufactured, manufacturedByUnitId, unitId],
+                manufacturingUnitName
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            [
+                productId,
+                productName,
+                categoryId,
+                categoryName,
+                quantityManufactured,
+                unitId,
+                unitName,
+                manufacturedByUnitId,
+                manufacturingUnitName
+            ],
             function (err) {
                 if (err) return res.status(500).json({ error: err.message });
                 res.json({ id: this.lastID });
