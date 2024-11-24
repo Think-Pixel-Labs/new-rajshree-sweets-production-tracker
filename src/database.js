@@ -20,8 +20,7 @@ function initializeDatabase() {
 
         db.run(`CREATE TABLE IF NOT EXISTS manufacturingUnits (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL UNIQUE,
-            description TEXT
+            name TEXT NOT NULL UNIQUE
         )`);
 
         db.run(`CREATE TABLE IF NOT EXISTS products (
@@ -70,7 +69,7 @@ function initializeDatabase() {
 
         insertDefaultData('units', defaultData.units, ['name']);
         insertDefaultData('categories', defaultData.categories, ['name']);
-        insertDefaultData('manufacturingUnits', defaultData.manufacturingUnits, ['name', 'description']);
+        insertDefaultData('manufacturingUnits', defaultData.manufacturingUnits, ['name']);
         insertDefaultData('products', defaultData.products, ['name']);
     });
 }
