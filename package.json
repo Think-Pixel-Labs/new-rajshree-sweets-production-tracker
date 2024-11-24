@@ -48,8 +48,8 @@
       ],
       "extraResources": [
         {
-          "from": "data/production.db",
-          "to": "production.db"
+          "from": "./data/production.db",
+          "to": "./resources/production.db"
         },
         {
           "from": "public",
@@ -59,8 +59,8 @@
     },
     "extraResources": [
       {
-        "from": "data/production.db",
-        "to": "production.db"
+        "from": "./data/production.db",
+        "to": "./resources/production.db"
       },
       {
         "from": "public",
