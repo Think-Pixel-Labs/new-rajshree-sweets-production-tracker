@@ -32,6 +32,14 @@
             font-size: 1.2rem;
             font-weight: bold;
             color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .app-logo {
+            height: 32px;
+            width: auto;
         }
 
         .content-container {
@@ -305,7 +313,10 @@
 
 <body>
     <header class="app-header">
-        <div class="app-title">Production Tracker</div>
+        <div class="app-title">
+            <img src="/logo.webp" alt="Production Tracker" class="app-logo">
+            <span>Production Tracker</span>
+        </div>
         <button type="button" class="icon-button refresh-button" title="Refresh page" onclick="refreshPage()">↻</button>
     </header>
 
