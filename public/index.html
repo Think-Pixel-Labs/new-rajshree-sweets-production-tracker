@@ -280,7 +280,6 @@
                     <label for="summaryDate">Select Date:</label>
                     <input type="date" id="summaryDate">
                     <button onclick="exportCategorySummary()">Export Category Summary</button>
-                    <button onclick="exportManufacturingSummary()">Export Manufacturing Summary</button>
                 </div>
             </div>
             <table id="productionTable">
@@ -311,14 +310,6 @@
                     <input type="number" id="editQuantity" required>
                 </div>
                 <div class="form-group">
-                    <label for="editUnit">Unit Type:</label>
-                    <select id="editUnit" required></select>
-                </div>
-                <div class="form-group">
-                    <label for="editManufacturingUnit">Manufacturing Unit:</label>
-                    <select id="editManufacturingUnit" required></select>
-                </div>
-                <div class="form-group">
                     <label for="editReason">Updation Reason:</label>
                     <textarea id="editReason" required></textarea>
                 </div>
@@ -330,8 +321,6 @@
 
     <script>
         let products = [];
-        let manufacturingUnits = [];
-        let units = [];
 
         async function fetchProducts() {
             const response = await fetch('/api/products');
@@ -343,32 +332,6 @@
                 option.value = product.id;
                 option.textContent = product.name;
                 productSelect.appendChild(option);
-            });
-        }
-
-        async function fetchManufacturingUnits() {
-            const response = await fetch('/api/manufacturing-units');
-            manufacturingUnits = await response.json();
-            const manufacturingUnitSelect = document.getElementById('manufacturingUnitSelect');
-            manufacturingUnitSelect.innerHTML = '<option value="">Select a manufacturing unit</option>';
-            manufacturingUnits.forEach(unit => {
-                const option = document.createElement('option');
-                option.value = unit.id;
-                option.textContent = unit.name;
-                manufacturingUnitSelect.appendChild(option);
-            });
-        }
-
-        async function fetchUnits() {
-            const response = await fetch('/api/units');
-            units = await response.json();
-            const unitSelect = document.getElementById('unitSelect');
-            unitSelect.innerHTML = '<option value="">Select a unit</option>';
-            units.forEach(unit => {
-                const option = document.createElement('option');
-                option.value = unit.id;
-                option.textContent = unit.name;
-                unitSelect.appendChild(option);
             });
         }
 
@@ -384,8 +347,7 @@
         document.getElementById('productionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const productId = document.getElementById('productSelect').value;
-            const selectedProduct = products.find(p => p.id == productId);
-            const quantityManufactured = document.getElementById('quantity').value;
+            const quantity = document.getElementById('quantity').value;
 
             const response = await fetch('/api/production', {
                 method: 'POST',
@@ -394,10 +356,7 @@
                 },
                 body: JSON.stringify({
                     productId,
-                    productName: selectedProduct.name,
-                    category: selectedProduct.category,
-                    quantityManufactured,
-                    unitType: selectedProduct.unitType
+                    quantity
                 }),
             });
 
@@ -440,7 +399,7 @@
                 row.insertCell(0).textContent = item.id;
                 row.insertCell(1).textContent = formatDateTimeIndian(item.createdAt);
                 row.insertCell(2).textContent = item.productName;
-                row.insertCell(3).textContent = item.quantityManufactured;
+                row.insertCell(3).textContent = item.quantity;
                 row.insertCell(4).textContent = item.unitType;
                 row.insertCell(5).textContent = item.category;
                 row.insertCell(6).textContent = item.updationReason || '-';
@@ -452,12 +411,7 @@
                 const editButton = document.createElement('button');
                 editButton.textContent = 'Edit';
                 editButton.className = 'action-button edit-button';
-                editButton.onclick = () => editLog(
-                    item.id,
-                    item.quantityManufactured,
-                    item.unitId,
-                    item.manufacturedByUnitId
-                );
+                editButton.onclick = () => editLog(item.id, item.quantity);
                 actionsCell.appendChild(editButton);
 
                 const deleteButton = document.createElement('button');
@@ -470,40 +424,13 @@
 
         let currentEditId = null;
 
-        function editLog(id, currentQuantity, currentUnitId, currentManufacturingUnitId) {
+        function editLog(id, currentQuantity) {
             currentEditId = id;
             const editDialog = document.getElementById('editDialog');
             const editQuantity = document.getElementById('editQuantity');
-            const editUnit = document.getElementById('editUnit');
-            const editManufacturingUnit = document.getElementById('editManufacturingUnit');
             const editReason = document.getElementById('editReason');
 
             editQuantity.value = currentQuantity;
-
-            // Populate unit select
-            editUnit.innerHTML = '<option value="">Select a unit</option>';
-            units.forEach(unit => {
-                const option = document.createElement('option');
-                option.value = unit.id;
-                option.textContent = unit.name;
-                if (unit.id == currentUnitId) {
-                    option.selected = true;
-                }
-                editUnit.appendChild(option);
-            });
-
-            // Populate manufacturing units
-            editManufacturingUnit.innerHTML = '<option value="">Select a manufacturing unit</option>';
-            manufacturingUnits.forEach(unit => {
-                const option = document.createElement('option');
-                option.value = unit.id;
-                option.textContent = unit.name;
-                if (unit.id == currentManufacturingUnitId) {
-                    option.selected = true;
-                }
-                editManufacturingUnit.appendChild(option);
-            });
-
             editReason.value = '';
             editDialog.style.display = 'block';
         }
@@ -515,16 +442,13 @@
         document.getElementById('editForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const quantity = document.getElementById('editQuantity').value;
-            const unitId = document.getElementById('editUnit').value;
-            const unitName = document.getElementById('editUnit').options[document.getElementById('editUnit').selectedIndex].text;
-            const manufacturedByUnitId = document.getElementById('editManufacturingUnit').value;
             const reason = document.getElementById('editReason').value;
 
-            await updateLog(currentEditId, quantity, unitId, unitName, manufacturedByUnitId, reason);
+            await updateLog(currentEditId, quantity, reason);
             closeEditDialog();
         });
 
-        async function updateLog(id, quantity, unitId, unitName, manufacturedByUnitId, reason) {
+        async function updateLog(id, quantity, reason) {
             const response = await fetch(`/api/production/${id}`, {
                 method: 'PUT',
                 headers: {
@@ -532,9 +456,6 @@
                 },
                 body: JSON.stringify({
                     quantityManufactured: quantity,
-                    unitId: unitId,
-                    unitName: unitName,
-                    manufacturedByUnitId: manufacturedByUnitId,
                     updationReason: reason
                 }),
             });
@@ -550,8 +471,6 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchProducts();
-            fetchManufacturingUnits();
-            fetchUnits();
             fetchProductionData();
         });
 
@@ -649,38 +568,6 @@
             } catch (error) {
                 console.error('Export failed:', error);
                 alert('Failed to export category summary. Please try again.');
-            }
-        }
-
-        async function exportManufacturingSummary() {
-            const summaryDate = document.getElementById('summaryDate').value;
-            if (!summaryDate) {
-                alert('Please select a date for the summary');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/export-manufacturing-summary', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ date: summaryDate })
-                });
-
-                if (!response.ok) {
-                    throw new Error('Export failed');
-                }
-
-                const result = await response.json();
-                if (result.success) {
-                    alert('Manufacturing summary exported successfully!');
-                } else {
-                    alert(result.message || 'Export failed');
-                }
-            } catch (error) {
-                console.error('Export failed:', error);
-                alert('Failed to export manufacturing summary. Please try again.');
             }
         }
     </script>
