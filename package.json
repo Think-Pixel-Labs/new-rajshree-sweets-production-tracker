@@ -47,8 +47,20 @@
     "win": {
       "target": [
         "nsis"
+      ],
+      "extraResources": [
+        {
+          "from": "data/production.db",
+          "to": "production.db"
+        }
       ]
     },
+    "extraResources": [
+      {
+        "from": "data/production.db",
+        "to": "production.db"
+      }
+    ],
     "files": [
       "**/*",
       "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",

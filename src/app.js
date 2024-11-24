@@ -1,12 +1,20 @@
 const { app, BrowserWindow, globalShortcut, dialog } = require('electron');
+const path = require('path');
 const { autoUpdater } = require('electron-updater');
 const express = require('express');
 const serverApp = express();
-const db = require('./database');
+const db = require('./database')(getDatabasePath());
 const fastcsv = require('fast-csv');
 const fs = require('fs');
 
 let mainWindow;
+
+function getDatabasePath() {
+    if (app.isPackaged) {
+        return path.join(process.resourcesPath, 'production.db');
+    }
+    return path.join(__dirname, '..', 'data', 'production.db');
+}
 
 function checkForUpdates() {
     autoUpdater.checkForUpdatesAndNotify();
