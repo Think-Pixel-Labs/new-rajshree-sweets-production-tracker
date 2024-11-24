@@ -36,8 +36,10 @@
 
         .content-container {
             padding-top: 70px;
-            /* Adjusted to account for the header */
-            /* Adjust based on your header height */
+            display: flex;
+            height: calc(100vh - 70px);
+            gap: 20px;
+            padding: 70px 20px 20px 20px;
         }
 
         .modal {
@@ -80,6 +82,143 @@
 
         #editForm button {
             margin-right: 10px;
+        }
+
+        #addLogSection {
+            flex: 0 0 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        #viewLogsSection {
+            flex: 1;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        #productionTable {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        #productionTable th,
+        #productionTable td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        #productionTable th {
+            background-color: #4a90e2;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            padding: 15px 12px;
+            font-weight: 500;
+        }
+
+        .date-filter {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #357abd;
+        }
+
+        #addLogSection,
+        #viewLogsSection {
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+
+        #addLogSection::-webkit-scrollbar,
+        #viewLogsSection::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #addLogSection::-webkit-scrollbar-thumb,
+        #viewLogsSection::-webkit-scrollbar-thumb {
+            background-color: #ccc;
+            border-radius: 3px;
+        }
+
+        #addLogSection::-webkit-scrollbar-track,
+        #viewLogsSection::-webkit-scrollbar-track {
+            background-color: #f5f5f5;
+        }
+
+        .action-button {
+            min-width: 80px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            display: block;
+            text-align: center;
+            margin: 5px 0;
+            width: 100%;
+        }
+
+        .edit-button {
+            background-color: #4a90e2;
+            color: white;
+        }
+
+        .delete-button {
+            background-color: #ff4444;
+            color: white;
+        }
+
+        .action-button:hover {
+            opacity: 0.9;
+        }
+
+        .actions-cell {
+            white-space: normal;
+            min-width: 100px;
         }
     </style>
 </head>
@@ -320,8 +459,11 @@
                 row.insertCell(6).textContent = item.updatedAt ? formatDateTimeIndian(item.updatedAt) : '-';
 
                 const actionsCell = row.insertCell(7);
+                actionsCell.className = 'actions-cell';
+
                 const editButton = document.createElement('button');
                 editButton.textContent = 'Edit';
+                editButton.className = 'action-button edit-button';
                 editButton.onclick = () => editLog(
                     item.id,
                     item.quantityManufactured,
@@ -330,12 +472,9 @@
                 );
                 actionsCell.appendChild(editButton);
 
-                actionsCell.appendChild(document.createTextNode(' '));
-
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Delete';
-                deleteButton.style.backgroundColor = '#ff4444';
-                deleteButton.style.color = 'white';
+                deleteButton.className = 'action-button delete-button';
                 deleteButton.onclick = () => deleteLog(item.id);
                 actionsCell.appendChild(deleteButton);
             });
