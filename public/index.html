@@ -239,12 +239,74 @@
         .export-controls button:hover {
             background-color: #218838;
         }
+
+        .select-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .product-search {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .filtered-select {
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .search-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .search-controls .product-search {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .icon-button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 32px;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .icon-button:hover {
+            background-color: #357abd;
+        }
+
+        .clear-button {
+            background-color: #6c757d;
+        }
+
+        .clear-button:hover {
+            background-color: #5a6268;
+        }
+
+        .refresh-button {
+            margin-right: 10px;
+        }
     </style>
 </head>
 
 <body>
     <header class="app-header">
         <div class="app-title">Production Tracker</div>
+        <button type="button" class="icon-button refresh-button" title="Refresh page" onclick="refreshPage()">↻</button>
     </header>
 
     <main class="content-container">
@@ -252,10 +314,18 @@
             <h2>Add Production Log</h2>
             <form id="productionForm">
                 <div class="form-group">
-                    <label for="productSelect">Product:</label>
-                    <select id="productSelect" required>
-                        <option value="">Select a product</option>
-                    </select>
+                    <label for="productSearch">Search Product:</label>
+                    <div class="select-container">
+                        <div class="search-controls">
+                            <input type="text" id="productSearch" class="product-search"
+                                placeholder="Type to search products...">
+                            <button type="button" class="icon-button clear-button" title="Clear search"
+                                onclick="clearProductSearch()">✕</button>
+                        </div>
+                        <select id="productSelect" class="filtered-select" required>
+                            <option value="">Select a product</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="quantity">Quantity:</label>
@@ -323,14 +393,39 @@
         let products = [];
 
         async function fetchProducts() {
-            const response = await fetch('/api/products');
-            products = await response.json();
+            try {
+                const response = await fetch('/api/products');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch products');
+                }
+                products = await response.json();
+                const productSelect = document.getElementById('productSelect');
+                productSelect.innerHTML = '<option value="">Select a product</option>';
+                products.forEach(product => {
+                    const option = document.createElement('option');
+                    option.value = product.id;
+                    option.textContent = `${product.name} (${product.category})`;
+                    productSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching products:', error);
+                alert('Failed to fetch products. Please try refreshing.');
+            }
+        }
+
+        function filterProducts(searchText) {
             const productSelect = document.getElementById('productSelect');
             productSelect.innerHTML = '<option value="">Select a product</option>';
-            products.forEach(product => {
+
+            const filteredProducts = products.filter(product =>
+                product.name.toLowerCase().includes(searchText.toLowerCase()) ||
+                product.category.toLowerCase().includes(searchText.toLowerCase())
+            );
+
+            filteredProducts.forEach(product => {
                 const option = document.createElement('option');
                 option.value = product.id;
-                option.textContent = product.name;
+                option.textContent = `${product.name} (${product.category})`;
                 productSelect.appendChild(option);
             });
         }
@@ -472,6 +567,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             fetchProducts();
             fetchProductionData();
+
+            document.getElementById('productSearch').addEventListener('input', (e) => {
+                filterProducts(e.target.value);
+            });
         });
 
         async function exportProductionLogs() {
@@ -569,6 +668,43 @@
                 console.error('Export failed:', error);
                 alert('Failed to export category summary. Please try again.');
             }
+        }
+
+        async function refreshProducts() {
+            const refreshButton = document.querySelector('.refresh-button');
+            refreshButton.style.transform = 'rotate(360deg)';
+            refreshButton.style.transition = 'transform 0.5s';
+
+            await fetchProducts();
+
+            setTimeout(() => {
+                refreshButton.style.transform = 'rotate(0deg)';
+                refreshButton.style.transition = 'none';
+            }, 500);
+        }
+
+        function clearProductSearch() {
+            const searchInput = document.getElementById('productSearch');
+            searchInput.value = '';
+            filterProducts('');
+            searchInput.focus();
+        }
+
+        function refreshPage() {
+            const refreshButton = document.querySelector('.refresh-button');
+            refreshButton.style.transform = 'rotate(360deg)';
+            refreshButton.style.transition = 'transform 0.5s';
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 500);
+        }
+
+        function clearProductSearch() {
+            const searchInput = document.getElementById('productSearch');
+            searchInput.value = '';
+            filterProducts('');
+            searchInput.focus();
         }
     </script>
 </body>
