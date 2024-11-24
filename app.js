@@ -15,7 +15,8 @@ function createWindow() {
         width: 800,
         height: 600,
         webPreferences: { nodeIntegration: true, contextIsolation: false },
-        title: "Production Tracker"
+        title: "Production Tracker",
+        fullscreen: true
     });
 
     serverApp.use(express.static('public'));
