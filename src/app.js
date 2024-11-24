@@ -96,11 +96,24 @@ function createWindow() {
 
     serverApp.put('/api/production/:id', (req, res) => {
         const { id } = req.params;
-        const { quantityManufactured, unitId, updationReason } = req.body;
+        const {
+            quantityManufactured,
+            unitId,
+            unitName,
+            manufacturedByUnitId,
+            updationReason
+        } = req.body;
 
         db.run(
-            'UPDATE productionLog SET quantityManufactured = ?, unitId = ?, updationReason = ?, updatedAt = CURRENT_TIMESTAMP WHERE id = ?',
-            [quantityManufactured, unitId, updationReason, id],
+            `UPDATE productionLog 
+             SET quantityManufactured = ?, 
+                 unitId = ?, 
+                 unitName = ?,
+                 manufacturedByUnitId = ?, 
+                 updationReason = ?, 
+                 updatedAt = CURRENT_TIMESTAMP 
+             WHERE id = ?`,
+            [quantityManufactured, unitId, unitName, manufacturedByUnitId, updationReason, id],
             function (err) {
                 if (err) return res.status(500).json({ error: err.message });
                 res.json({ success: true });
@@ -219,12 +232,12 @@ function createWindow() {
             }
 
             try {
-                // Format the data for CSV
+                // Format the data for CSV with separate quantity and unit columns
                 const csvData = rows.map(row => ({
                     'Date': new Date(row.createdAt).toLocaleString(),
                     'Product': row.productName,
                     'Quantity': row.quantityManufactured,
-                    'Unit': row.unitName,
+                    'Unit Type': row.unitName || '',  // Separate column for unit type
                     'Manufacturing Unit': row.manufacturingUnitName,
                     'Category': row.categoryName,
                     'Update Reason': row.updationReason || '',
@@ -260,6 +273,15 @@ function createWindow() {
                 console.error('Export error:', error);
                 res.status(500).json({ error: 'Failed to export data' });
             }
+        });
+    });
+
+    serverApp.delete('/api/production/:id', (req, res) => {
+        const { id } = req.params;
+
+        db.run('DELETE FROM productionLog WHERE id = ?', [id], function (err) {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ success: true });
         });
     });
 
