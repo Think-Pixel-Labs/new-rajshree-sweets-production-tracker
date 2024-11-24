@@ -16,6 +16,13 @@ function getDatabasePath() {
     return path.join(__dirname, '..', 'data', 'production.db');
 }
 
+function getPublicPath() {
+    if (app.isPackaged) {
+        return path.join(process.resourcesPath, 'public');
+    }
+    return path.join(__dirname, '..', 'public');
+}
+
 function checkForUpdates() {
     autoUpdater.checkForUpdatesAndNotify();
 }
@@ -29,7 +36,7 @@ function createWindow() {
         fullscreen: true
     });
 
-    serverApp.use(express.static('public'));
+    serverApp.use(express.static(getPublicPath()));
     serverApp.use(express.json());
 
     serverApp.post('/api/production', (req, res) => {
@@ -374,6 +381,10 @@ function createWindow() {
                 res.status(500).json({ error: 'Failed to export data' });
             }
         });
+    });
+
+    serverApp.get('*', (req, res) => {
+        res.sendFile(path.join(getPublicPath(), 'index.html'));
     });
 
     setTimeout(() => {
