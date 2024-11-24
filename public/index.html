@@ -350,6 +350,7 @@
                     <label for="summaryDate">Select Date:</label>
                     <input type="date" id="summaryDate">
                     <button onclick="exportCategorySummary()">Export Category Summary</button>
+                    <button onclick="exportDetailedCategorySummary()">Export Detailed Summary</button>
                 </div>
             </div>
             <table id="productionTable">
@@ -667,6 +668,38 @@
             } catch (error) {
                 console.error('Export failed:', error);
                 alert('Failed to export category summary. Please try again.');
+            }
+        }
+
+        async function exportDetailedCategorySummary() {
+            const summaryDate = document.getElementById('summaryDate').value;
+            if (!summaryDate) {
+                alert('Please select a date for the detailed summary');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/export-detailed-category-summary', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ date: summaryDate })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Export failed');
+                }
+
+                const result = await response.json();
+                if (result.success) {
+                    alert('Detailed category summary exported successfully!');
+                } else {
+                    alert(result.message || 'Export failed');
+                }
+            } catch (error) {
+                console.error('Export failed:', error);
+                alert('Failed to export detailed category summary. Please try again.');
             }
         }
 

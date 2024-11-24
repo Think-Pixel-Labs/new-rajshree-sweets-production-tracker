@@ -253,6 +253,121 @@ function createWindow() {
         res.status(400).json({ error: 'Manufacturing unit tracking has been removed' });
     });
 
+    serverApp.post('/api/export-detailed-category-summary', async (req, res) => {
+        const { date } = req.body;
+
+        const query = `
+            SELECT 
+                p.category,
+                p.name as productName,
+                SUM(pl.quantity) as totalQuantity,
+                p.unitType,
+                date(pl.createdAt) as productionDate,
+                GROUP_CONCAT(pl.id) as logIds
+            FROM productionLog pl
+            JOIN products p ON pl.productId = p.id
+            WHERE date(pl.createdAt) = ?
+            GROUP BY p.category, p.name, p.unitType
+            ORDER BY p.category, p.name
+        `;
+
+        db.all(query, [date], async (err, rows) => {
+            if (err) {
+                console.error('Detailed category summary retrieval error:', err);
+                return res.status(500).json({ error: 'An error occurred while processing your request' });
+            }
+
+            try {
+                // Process the data to group by category
+                const categoryMap = new Map();
+
+                rows.forEach(row => {
+                    if (!categoryMap.has(row.category)) {
+                        categoryMap.set(row.category, {
+                            date: new Date(row.productionDate).toLocaleDateString(),
+                            category: row.category,
+                            totalQuantity: 0,
+                            products: []
+                        });
+                    }
+
+                    const category = categoryMap.get(row.category);
+                    category.products.push({
+                        productName: row.productName,
+                        quantity: row.totalQuantity,
+                        unit: row.unitType
+                    });
+
+                    // Add to category total if units match
+                    if (category.products[0].unit === row.unitType) {
+                        category.totalQuantity += row.totalQuantity;
+                    }
+                });
+
+                // Format for CSV
+                const csvData = [];
+                for (const categoryData of categoryMap.values()) {
+                    // Add category header row
+                    csvData.push({
+                        'Date': categoryData.date,
+                        'Category': categoryData.category,
+                        'Total Quantity': categoryData.totalQuantity,
+                        'Unit': categoryData.products[0].unit,
+                        'Product': '',
+                        'Product Quantity': ''
+                    });
+
+                    // Add individual product rows
+                    categoryData.products.forEach(product => {
+                        csvData.push({
+                            'Date': '',
+                            'Category': '',
+                            'Total Quantity': '',
+                            'Unit': '',
+                            'Product': product.productName,
+                            'Product Quantity': `${product.quantity} ${product.unit}`
+                        });
+                    });
+
+                    // Add empty row between categories
+                    csvData.push({
+                        'Date': '',
+                        'Category': '',
+                        'Total Quantity': '',
+                        'Unit': '',
+                        'Product': '',
+                        'Product Quantity': ''
+                    });
+                }
+
+                const result = await dialog.showSaveDialog(mainWindow, {
+                    title: 'Save Detailed Category Summary',
+                    defaultPath: `detailed_category_summary_${date}.csv`,
+                    filters: [{ name: 'CSV Files', extensions: ['csv'] }]
+                });
+
+                if (!result.canceled && result.filePath) {
+                    const ws = fs.createWriteStream(result.filePath);
+                    fastcsv
+                        .write(csvData, { headers: true })
+                        .pipe(ws)
+                        .on('finish', () => {
+                            res.json({ success: true, path: result.filePath });
+                        })
+                        .on('error', (error) => {
+                            console.error('CSV write error:', error);
+                            res.status(500).json({ error: 'Failed to write CSV file' });
+                        });
+                } else {
+                    res.json({ success: false, message: 'Export cancelled' });
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                res.status(500).json({ error: 'Failed to export data' });
+            }
+        });
+    });
+
     setTimeout(() => {
         const server = serverApp.listen(0, () => {
             const port = server.address().port;
