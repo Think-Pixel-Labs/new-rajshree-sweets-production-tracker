@@ -81,7 +81,7 @@ function createWindow() {
             params = [startDate, endDate];
         }
 
-        query += ' ORDER BY pl.createdAt DESC';
+        query += ' ORDER BY p.name ASC, pl.createdAt DESC';
 
         db.all(query, params, (err, rows) => {
             if (err) {
@@ -107,14 +107,14 @@ function createWindow() {
     });
 
     serverApp.get('/api/units', (req, res) => {
-        db.all('SELECT * FROM units ORDER BY id', (err, rows) => {
+        db.all('SELECT * FROM units ORDER BY name ASC', (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(rows);
         });
     });
 
     serverApp.get('/api/categories', (req, res) => {
-        db.all('SELECT * FROM categories ORDER BY id', (err, rows) => {
+        db.all('SELECT * FROM categories ORDER BY name ASC', (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(rows);
         });
@@ -126,7 +126,7 @@ function createWindow() {
                 p.id, 
                 p.name
             FROM products p 
-            ORDER BY p.id`;
+            ORDER BY p.name ASC`;
 
         db.all(query, (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
@@ -135,7 +135,7 @@ function createWindow() {
     });
 
     serverApp.get('/api/manufacturing-units', (req, res) => {
-        db.all('SELECT * FROM manufacturingUnits ORDER BY id', (err, rows) => {
+        db.all('SELECT * FROM manufacturingUnits ORDER BY name ASC', (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
             res.json(rows);
         });
