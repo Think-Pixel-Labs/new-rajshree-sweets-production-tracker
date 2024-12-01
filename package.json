@@ -47,7 +47,8 @@
         "extraResource": [
           "./data/production.db",
           "./public"
-        ]
+        ],
+        "icon": "./public/logo.ico"
       },
       "makers": [
         {
@@ -57,7 +58,8 @@
             "authors": "Think Pixel Labs",
             "description": "Production tracker for New Rajshree Sweets",
             "exe": "Production Tracker.exe",
-            "setupExe": "Production Tracker Setup.exe"
+            "setupExe": "Production Tracker Setup.exe",
+            "setupIcon": "./public/logo.ico"
           }
         },
         {
