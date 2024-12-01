@@ -13,8 +13,11 @@
     "type": "git",
     "url": "https://github.com/Think-Pixel-Digital-Media-Solutions/new-rajshree-sweets-production-tracker.git"
   },
+  "author": {
+    "name": "Think Pixel Labs",
+    "email": "piyushkeshari24@gmail.com"
+  },
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "description": "Production tracker for New Rajshree Sweets",
   "dependencies": {
@@ -50,7 +53,11 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "production_tracker"
+            "name": "production_tracker",
+            "authors": "Think Pixel Labs",
+            "description": "Production tracker for New Rajshree Sweets",
+            "exe": "Production Tracker.exe",
+            "setupExe": "Production Tracker Setup.exe"
           }
         },
         {
