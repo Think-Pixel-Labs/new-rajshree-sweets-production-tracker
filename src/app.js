@@ -10,14 +10,18 @@ let db;
 
 function getDatabasePath() {
     if (app.isPackaged) {
-        return path.join(process.resourcesPath, 'production.db');
+        const dbPath = path.join(process.resourcesPath, 'resources', 'production.db');
+        console.log('Production DB Path:', dbPath);
+        return dbPath;
     }
-    return path.join(__dirname, '..', 'data', 'production.db');
+    const devPath = path.join(__dirname, '..', 'data', 'production.db');
+    console.log('Development DB Path:', devPath);
+    return devPath;
 }
 
 function getPublicPath() {
     if (app.isPackaged) {
-        return path.join(process.resourcesPath, 'public');
+        return path.join(process.resourcesPath, 'resources', 'public');
     }
     return path.join(__dirname, '..', 'public');
 }
@@ -28,16 +32,30 @@ function checkForUpdates() {
 
 function createWindow() {
     const dbPath = getDatabasePath();
-    console.log('Database Path:', dbPath);
+    console.log('Attempting to open database at:', dbPath);
 
     // Check if database file exists
     if (!fs.existsSync(dbPath)) {
         console.error('Database file not found at:', dbPath);
+        dialog.showErrorBox(
+            'Database Error',
+            `Database file not found at: ${dbPath}`
+        );
         app.quit();
         return;
     }
 
-    db = require('./database')(dbPath);
+    try {
+        db = require('./database')(dbPath);
+    } catch (err) {
+        console.error('Failed to initialize database:', err);
+        dialog.showErrorBox(
+            'Database Error',
+            `Failed to initialize database: ${err.message}`
+        );
+        app.quit();
+        return;
+    }
 
     mainWindow = new BrowserWindow({
         width: 800,

@@ -46,28 +46,8 @@
     "win": {
       "target": [
         "nsis"
-      ],
-      "extraResources": [
-        {
-          "from": "data/production.db",
-          "to": "production.db"
-        },
-        {
-          "from": "public",
-          "to": "public"
-        }
       ]
     },
-    "extraResources": [
-      {
-        "from": "data/production.db",
-        "to": "production.db"
-      },
-      {
-        "from": "public",
-        "to": "public"
-      }
-    ],
     "files": [
       "**/*",
       "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
@@ -81,6 +61,16 @@
       "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
       "!**/{appveyor.yml,.travis.yml,circle.yml}",
       "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
+    ],
+    "extraResources": [
+      {
+        "from": "./data/production.db",
+        "to": "./resources/production.db"
+      },
+      {
+        "from": "./public",
+        "to": "./resources/public"
+      }
     ]
   }
 }
