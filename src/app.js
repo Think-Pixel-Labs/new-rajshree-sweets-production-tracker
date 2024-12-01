@@ -202,13 +202,25 @@ function createWindow() {
                         filters: [{ name: 'CSV Files', extensions: ['csv'] }]
                     });
 
+                    // Force focus back to main window
+                    mainWindow.setAlwaysOnTop(true);
+                    mainWindow.focus();
+                    setTimeout(() => {
+                        mainWindow.setAlwaysOnTop(false);
+                    }, 100);
+
                     if (!result.canceled && result.filePath) {
                         const ws = fs.createWriteStream(result.filePath);
                         fastcsv
                             .write(csvData, { headers: true })
                             .pipe(ws)
                             .on('finish', () => {
+                                // Force focus again after file write
+                                mainWindow.setAlwaysOnTop(true);
                                 mainWindow.focus();
+                                setTimeout(() => {
+                                    mainWindow.setAlwaysOnTop(false);
+                                }, 100);
                                 res.json({ success: true, path: result.filePath });
                             })
                             .on('error', (error) => {
@@ -217,7 +229,6 @@ function createWindow() {
                                 res.status(500).json({ error: 'Failed to write CSV file' });
                             });
                     } else {
-                        mainWindow.focus();
                         res.json({ success: false, message: 'Export cancelled' });
                     }
                 } catch (error) {
@@ -280,16 +291,30 @@ function createWindow() {
                     filters: [{ name: 'CSV Files', extensions: ['csv'] }]
                 });
 
+                // Force focus back to main window
+                mainWindow.setAlwaysOnTop(true);
+                mainWindow.focus();
+                setTimeout(() => {
+                    mainWindow.setAlwaysOnTop(false);
+                }, 100);
+
                 if (!result.canceled && result.filePath) {
                     const ws = fs.createWriteStream(result.filePath);
                     fastcsv
                         .write(csvData, { headers: true })
                         .pipe(ws)
                         .on('finish', () => {
+                            // Force focus again after file write
+                            mainWindow.setAlwaysOnTop(true);
+                            mainWindow.focus();
+                            setTimeout(() => {
+                                mainWindow.setAlwaysOnTop(false);
+                            }, 100);
                             res.json({ success: true, path: result.filePath });
                         })
                         .on('error', (error) => {
                             console.error('CSV write error:', error);
+                            mainWindow.focus();
                             res.status(500).json({ error: 'Failed to write CSV file' });
                         });
                 } else {
@@ -297,6 +322,7 @@ function createWindow() {
                 }
             } catch (error) {
                 console.error('Export error:', error);
+                mainWindow.focus();
                 res.status(500).json({ error: 'Failed to export data' });
             }
         });
@@ -399,16 +425,30 @@ function createWindow() {
                     filters: [{ name: 'CSV Files', extensions: ['csv'] }]
                 });
 
+                // Force focus back to main window
+                mainWindow.setAlwaysOnTop(true);
+                mainWindow.focus();
+                setTimeout(() => {
+                    mainWindow.setAlwaysOnTop(false);
+                }, 100);
+
                 if (!result.canceled && result.filePath) {
                     const ws = fs.createWriteStream(result.filePath);
                     fastcsv
                         .write(csvData, { headers: true })
                         .pipe(ws)
                         .on('finish', () => {
+                            // Force focus again after file write
+                            mainWindow.setAlwaysOnTop(true);
+                            mainWindow.focus();
+                            setTimeout(() => {
+                                mainWindow.setAlwaysOnTop(false);
+                            }, 100);
                             res.json({ success: true, path: result.filePath });
                         })
                         .on('error', (error) => {
                             console.error('CSV write error:', error);
+                            mainWindow.focus();
                             res.status(500).json({ error: 'Failed to write CSV file' });
                         });
                 } else {
@@ -416,6 +456,7 @@ function createWindow() {
                 }
             } catch (error) {
                 console.error('Export error:', error);
+                mainWindow.focus();
                 res.status(500).json({ error: 'Failed to export data' });
             }
         });
