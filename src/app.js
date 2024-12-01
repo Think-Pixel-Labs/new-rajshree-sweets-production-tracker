@@ -10,7 +10,7 @@ let db;
 
 function getDatabasePath() {
     if (app.isPackaged) {
-        const dbPath = path.join(process.resourcesPath, 'resources', 'production.db');
+        const dbPath = path.join(process.resourcesPath, 'production.db');
         console.log('Production DB Path:', dbPath);
         return dbPath;
     }
@@ -21,7 +21,7 @@ function getDatabasePath() {
 
 function getPublicPath() {
     if (app.isPackaged) {
-        return path.join(process.resourcesPath, 'resources', 'public');
+        return path.join(process.resourcesPath, 'public');
     }
     return path.join(__dirname, '..', 'public');
 }
@@ -452,3 +452,5 @@ autoUpdater.on('update-downloaded', () => {
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
 app.on('activate', () => { if (mainWindow === null) createWindow(); });
 app.on('will-quit', () => { globalShortcut.unregister('F11'); });
+
+if (require('electron-squirrel-startup')) app.quit();
