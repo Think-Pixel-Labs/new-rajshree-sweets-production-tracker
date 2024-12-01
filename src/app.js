@@ -1,9 +1,9 @@
 const { app, BrowserWindow, globalShortcut, dialog } = require('electron');
 const path = require('path');
-const { autoUpdater } = require('electron-updater');
 const express = require('express');
 const serverApp = express();
 const fs = require('fs');
+const fastcsv = require('fast-csv');
 
 let mainWindow;
 let db;
@@ -24,10 +24,6 @@ function getPublicPath() {
         return path.join(process.resourcesPath, 'public');
     }
     return path.join(__dirname, '..', 'public');
-}
-
-function checkForUpdates() {
-    autoUpdater.checkForUpdatesAndNotify();
 }
 
 function createWindow() {
@@ -439,14 +435,6 @@ app.on('ready', () => {
     globalShortcut.register('F11', () => {
         mainWindow.setFullScreen(!mainWindow.isFullScreen());
     });
-});
-
-autoUpdater.on('update-available', () => {
-    mainWindow.webContents.send('update_available');
-});
-
-autoUpdater.on('update-downloaded', () => {
-    mainWindow.webContents.send('update_downloaded');
 });
 
 app.on('window-all-closed', () => { if (process.platform !== 'darwin') app.quit(); });
