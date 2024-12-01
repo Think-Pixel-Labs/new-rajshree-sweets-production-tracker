@@ -20,6 +20,7 @@
   "dependencies": {
     "csvtojson": "^2.0.10",
     "electron-squirrel-startup": "^1.0.1",
+    "electron-updater": "^6.3.9",
     "express": "^4.19.2",
     "fast-csv": "^5.0.2",
     "jsonwebtoken": "^9.0.2",
