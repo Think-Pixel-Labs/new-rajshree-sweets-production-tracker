@@ -54,11 +54,19 @@ function createWindow() {
     }
 
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1280,
+        height: 800,
         webPreferences: { nodeIntegration: true, contextIsolation: false },
         title: "Production Tracker",
-        fullscreen: true
+        icon: path.join(__dirname, '..', 'public', 'logo.ico'),
+        show: false,
+        center: true
+    });
+
+    // Show window when ready to prevent flickering
+    mainWindow.once('ready-to-show', () => {
+        mainWindow.show();
+        mainWindow.focus();
     });
 
     serverApp.use(express.static(getPublicPath()));
@@ -420,7 +428,6 @@ function createWindow() {
     }, 1000);
 
     mainWindow.on('closed', () => mainWindow = null);
-    checkForUpdates();
 
     mainWindow.webContents.on('ipc-message', async (event, channel, ...args) => {
         if (channel === 'export-production-logs') {
