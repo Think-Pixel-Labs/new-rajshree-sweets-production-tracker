@@ -161,71 +161,76 @@ function createWindow() {
     serverApp.post('/api/export-production-logs', async (req, res) => {
         const { startDate, endDate } = req.body;
 
-        const query = `
-            SELECT 
-                pl.id,
-                pl.quantity,
-                pl.createdAt,
-                pl.updatedAt,
-                pl.updationReason,
-                p.name as productName,
-                p.category,
-                p.unitType
-            FROM productionLog pl
-            JOIN products p ON pl.productId = p.id
-            WHERE date(pl.createdAt) BETWEEN ? AND ?
-            ORDER BY datetime(pl.createdAt) DESC
-        `;
+        try {
+            const query = `
+                SELECT 
+                    pl.id,
+                    pl.quantity,
+                    pl.createdAt,
+                    pl.updatedAt,
+                    pl.updationReason,
+                    p.name as productName,
+                    p.category,
+                    p.unitType
+                FROM productionLog pl
+                JOIN products p ON pl.productId = p.id
+                WHERE date(pl.createdAt) BETWEEN ? AND ?
+                ORDER BY datetime(pl.createdAt) DESC
+            `;
 
-        db.all(query, [startDate, endDate], async (err, rows) => {
-            if (err) {
-                console.error('Production log retrieval error:', err);
-                return res.status(500).json({ error: 'An error occurred while processing your request' });
-            }
+            db.all(query, [startDate, endDate], async (err, rows) => {
+                if (err) {
+                    console.error('Production log retrieval error:', err);
+                    return res.status(500).json({ error: 'An error occurred while processing your request' });
+                }
 
-            try {
-                // Format the data for CSV with separate quantity and unit columns
                 const csvData = rows.map(row => ({
                     'ID': row.id,
                     'Date': new Date(row.createdAt).toLocaleString(),
                     'Product': row.productName,
                     'Quantity': row.quantity,
-                    'Unit Type': row.unitType || '',  // Separate column for unit type
+                    'Unit Type': row.unitType || '',
                     'Category': row.category,
                     'Update Reason': row.updationReason || '',
                     'Last Updated': row.updatedAt ? new Date(row.updatedAt).toLocaleString() : ''
                 }));
 
-                // Show save dialog
-                const result = await dialog.showSaveDialog(mainWindow, {
-                    title: 'Save Production Logs',
-                    defaultPath: `production_logs_${startDate}_to_${endDate}.csv`,
-                    filters: [
-                        { name: 'CSV Files', extensions: ['csv'] }
-                    ]
-                });
+                try {
+                    const result = await dialog.showSaveDialog(mainWindow, {
+                        title: 'Save Production Logs',
+                        defaultPath: `production_logs_${startDate}_to_${endDate}.csv`,
+                        filters: [{ name: 'CSV Files', extensions: ['csv'] }]
+                    });
 
-                if (!result.canceled && result.filePath) {
-                    // Write to CSV file
-                    const ws = fs.createWriteStream(result.filePath);
-                    fastcsv
-                        .write(csvData, { headers: true })
-                        .pipe(ws)
-                        .on('finish', () => {
-                            res.json({ success: true, path: result.filePath });
-                        })
-                        .on('error', (error) => {
-                            console.error('CSV write error:', error);
-                            res.status(500).json({ error: 'Failed to write CSV file' });
-                        });
-                } else {
-                    res.json({ success: false, message: 'Export cancelled' });
+                    if (!result.canceled && result.filePath) {
+                        const ws = fs.createWriteStream(result.filePath);
+                        fastcsv
+                            .write(csvData, { headers: true })
+                            .pipe(ws)
+                            .on('finish', () => {
+                                mainWindow.focus();
+                                res.json({ success: true, path: result.filePath });
+                            })
+                            .on('error', (error) => {
+                                console.error('CSV write error:', error);
+                                mainWindow.focus();
+                                res.status(500).json({ error: 'Failed to write CSV file' });
+                            });
+                    } else {
+                        mainWindow.focus();
+                        res.json({ success: false, message: 'Export cancelled' });
+                    }
+                } catch (error) {
+                    console.error('Export error:', error);
+                    mainWindow.focus();
+                    res.status(500).json({ error: 'Failed to export data' });
                 }
-            } catch (error) {
-                console.error('Export error:', error);
-                res.status(500).json({ error: 'Failed to export data' });
-            }
-        });
+            });
+        } catch (error) {
+            console.error('Export error:', error);
+            mainWindow.focus();
+            res.status(500).json({ error: 'Failed to export data' });
+        }
     });
 
     serverApp.delete('/api/production/:id', (req, res) => {
