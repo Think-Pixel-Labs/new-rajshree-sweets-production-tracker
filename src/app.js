@@ -466,6 +466,69 @@ function createWindow() {
         res.sendFile(path.join(getPublicPath(), 'index.html'));
     });
 
+    serverApp.post('/api/products', (req, res) => {
+        const { name, category, unitType } = req.body;
+
+        db.run(
+            'INSERT INTO products (name, category, unitType) VALUES (?, ?, ?)',
+            [name, category, unitType],
+            function (err) {
+                if (err) return res.status(500).json({ error: err.message });
+                res.json({ id: this.lastID });
+            }
+        );
+    });
+
+    serverApp.put('/api/products/:id', (req, res) => {
+        const { id } = req.params;
+        const { name, category, unitType } = req.body;
+
+        db.run(
+            'UPDATE products SET name = ?, category = ?, unitType = ? WHERE id = ?',
+            [name, category, unitType, id],
+            function (err) {
+                if (err) return res.status(500).json({ error: err.message });
+                res.json({ success: true });
+            }
+        );
+    });
+
+    serverApp.delete('/api/products/:id', (req, res) => {
+        const { id } = req.params;
+
+        // Start a transaction to handle both the product deletion and related production logs
+        db.run('BEGIN TRANSACTION', (err) => {
+            if (err) {
+                return res.status(500).json({ error: err.message });
+            }
+
+            // First delete related production logs
+            db.run('DELETE FROM productionLog WHERE productId = ?', [id], (err) => {
+                if (err) {
+                    db.run('ROLLBACK');
+                    return res.status(500).json({ error: err.message });
+                }
+
+                // Then delete the product
+                db.run('DELETE FROM products WHERE id = ?', [id], (err) => {
+                    if (err) {
+                        db.run('ROLLBACK');
+                        return res.status(500).json({ error: err.message });
+                    }
+
+                    // Commit the transaction if both operations succeed
+                    db.run('COMMIT', (err) => {
+                        if (err) {
+                            db.run('ROLLBACK');
+                            return res.status(500).json({ error: err.message });
+                        }
+                        res.json({ success: true });
+                    });
+                });
+            });
+        });
+    });
+
     setTimeout(() => {
         const server = serverApp.listen(0, () => {
             const port = server.address().port;
@@ -485,8 +548,12 @@ function createWindow() {
 
 app.on('ready', () => {
     createWindow();
+    mainWindow.webContents.openDevTools();
     globalShortcut.register('F11', () => {
         mainWindow.setFullScreen(!mainWindow.isFullScreen());
+    });
+    globalShortcut.register('F12', () => {
+        mainWindow.webContents.openDevTools();
     });
 });
 
