@@ -58,7 +58,7 @@ function createWindow() {
         height: 800,
         webPreferences: { nodeIntegration: true, contextIsolation: false },
         title: "Production Tracker",
-        icon: path.join(__dirname, '..', 'public', 'logo.ico'),
+        icon: path.join(__dirname, '..', 'public', 'assets', 'logo.ico'),
         show: false,
         center: true
     });

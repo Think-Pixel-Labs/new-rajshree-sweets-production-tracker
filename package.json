@@ -48,7 +48,7 @@
           "./data/production.db",
           "./public"
         ],
-        "icon": "./public/logo.ico"
+        "icon": "./public/assets/logo.ico"
       },
       "makers": [
         {
@@ -59,7 +59,7 @@
             "description": "Production tracker for New Rajshree Sweets",
             "exe": "Production Tracker.exe",
             "setupExe": "Production Tracker Setup.exe",
-            "setupIcon": "./public/logo.ico"
+            "setupIcon": "./public/assets/logo.ico"
           }
         },
         {
