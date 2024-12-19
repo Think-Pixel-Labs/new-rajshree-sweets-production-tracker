@@ -45,7 +45,7 @@
       "packagerConfig": {
         "asar": true,
         "extraResource": [
-          "./data/production.db",
+          "./public/data/production.db",
           "./public"
         ],
         "icon": "./public/assets/logo.ico"

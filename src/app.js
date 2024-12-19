@@ -14,7 +14,7 @@ function getDatabasePath() {
         console.log('Production DB Path:', dbPath);
         return dbPath;
     }
-    const devPath = path.join(__dirname, '..', 'data', 'production.db');
+    const devPath = path.join(__dirname, '..', 'public', 'data', 'production.db');
     console.log('Development DB Path:', devPath);
     return devPath;
 }
