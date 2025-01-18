@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval'">
     <title>Production Tracker</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -22,38 +23,86 @@
         </div>
     </header>
 
-    <main class="content-container">
-        <section id="addLogSection">
-            <h2>Add Production Log</h2>
-            <form id="productionForm">
-                <div class="form-group">
-                    <label for="productSearch">Search Product:</label>
-                    <div class="select-container">
-                        <div class="search-controls">
-                            <input type="text" id="productSearch" class="product-search"
-                                placeholder="Type to search products...">
-                            <button type="button" class="icon-button clear-button" title="Clear search"
-                                onclick="clearProductSearch()">✕</button>
+    <div class="main-container">
+        <nav class="sidebar">
+            <ul class="nav-menu">
+                <li class="nav-item" data-tab="production-log">
+                    <span class="nav-icon">📝</span>
+                    Production Log
+                </li>
+                <li class="nav-item" data-tab="view-logs">
+                    <span class="nav-icon">📊</span>
+                    View Logs
+                </li>
+                <li class="nav-item" data-tab="product-management">
+                    <span class="nav-icon">📦</span>
+                    Product Management
+                </li>
+                <li class="nav-item" data-tab="reports">
+                    <span class="nav-icon">📈</span>
+                    Reports
+                </li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            <!-- Production Log Tab -->
+            <section id="production-log" class="tab-content">
+                <h2>Add Production Log</h2>
+                <form id="productionForm">
+                    <div class="form-group">
+                        <label for="productSearch">Search Product:</label>
+                        <div class="select-container">
+                            <div class="search-controls">
+                                <input type="text" id="productSearch" class="product-search"
+                                    placeholder="Type to search products...">
+                                <button type="button" class="icon-button clear-button" title="Clear search"
+                                    onclick="clearProductSearch()">✕</button>
+                            </div>
+                            <select id="productSelect" class="filtered-select" required>
+                                <option value="">Select a product</option>
+                            </select>
                         </div>
-                        <select id="productSelect" class="filtered-select" required>
-                            <option value="">Select a product</option>
-                        </select>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="quantity">Quantity:</label>
-                    <input type="number" id="quantity" required>
-                    <span id="unitTypeDisplay"></span>
-                </div>
-                <button type="submit">Add Production Log</button>
-            </form>
-        </section>
+                    <div class="form-group">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" id="quantity" required>
+                        <span id="unitTypeDisplay"></span>
+                    </div>
+                    <button type="submit">Add Production Log</button>
+                </form>
+            </section>
 
-        <section id="addLogSection">
-            <h2>Add Production Log</h2>
-            <!-- Previous production log form remains unchanged -->
+            <!-- View Logs Tab -->
+            <section id="view-logs" class="tab-content">
+                <h2>View Production Logs</h2>
+                <div class="date-filter">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" id="startDate">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate">
+                    <button id="filterButton">Filter</button>
+                </div>
+                <table id="productionTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Created At</th>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Unit Type</th>
+                            <th>Category</th>
+                            <th>Updation Reason</th>
+                            <th>Updated At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productionData"></tbody>
+                </table>
+            </section>
 
-            <div class="product-management">
+            <!-- Product Management Tab -->
+            <section id="product-management" class="tab-content">
                 <h2>Product Management</h2>
                 <form id="productForm" class="product-form">
                     <div class="form-group">
@@ -62,11 +111,15 @@
                     </div>
                     <div class="form-group">
                         <label for="productCategory">Category:</label>
-                        <input type="text" id="productCategory" required>
+                        <select id="productCategory" required>
+                            <option value="">Select Category</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="productUnitType">Unit Type:</label>
-                        <input type="text" id="productUnitType" required>
+                        <select id="productUnitType" required>
+                            <option value="">Select Unit Type</option>
+                        </select>
                     </div>
                     <button type="submit">Add Product</button>
                 </form>
@@ -82,44 +135,28 @@
                     </thead>
                     <tbody id="productTableBody"></tbody>
                 </table>
-            </div>
-        </section>
+            </section>
 
-        <section id="viewLogsSection">
-            <h2>View Production Logs</h2>
-            <div class="date-filter">
-                <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate">
-                <label for="endDate">End Date:</label>
-                <input type="date" id="endDate">
-                <button id="filterButton">Filter</button>
-                <button id="exportButton" onclick="exportProductionLogs()">Export Logs</button>
-
+            <!-- Reports Tab -->
+            <section id="reports" class="tab-content">
+                <h2>Reports</h2>
                 <div class="export-controls">
-                    <label for="summaryDate">Select Date:</label>
-                    <input type="date" id="summaryDate">
-                    <button onclick="exportCategorySummary()">Export Category Summary</button>
-                    <button onclick="exportDetailedCategorySummary()">Export Detailed Summary</button>
+                    <div class="export-group">
+                        <h3>Production Logs Export</h3>
+                        <button onclick="exportProductionLogs()">Export Logs</button>
+                    </div>
+                    
+                    <div class="export-group">
+                        <h3>Category Summary</h3>
+                        <label for="summaryDate">Select Date:</label>
+                        <input type="date" id="summaryDate">
+                        <button onclick="exportCategorySummary()">Export Category Summary</button>
+                        <button onclick="exportDetailedCategorySummary()">Export Detailed Summary</button>
+                    </div>
                 </div>
-            </div>
-            <table id="productionTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Created At</th>
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>Unit Type</th>
-                        <th>Category</th>
-                        <th>Updation Reason</th>
-                        <th>Updated At</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="productionData"></tbody>
-            </table>
-        </section>
-    </main>
+            </section>
+        </main>
+    </div>
 
     <div id="editDialog" class="modal" style="display: none;">
         <div class="modal-content">
@@ -149,11 +186,15 @@
                 </div>
                 <div class="form-group">
                     <label for="editProductCategory">Category:</label>
-                    <input type="text" id="editProductCategory" required>
+                    <select id="editProductCategory" required>
+                        <option value="">Select Category</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="editProductUnitType">Unit Type:</label>
-                    <input type="text" id="editProductUnitType" required>
+                    <select id="editProductUnitType" required>
+                        <option value="">Select Unit Type</option>
+                    </select>
                 </div>
                 <button type="submit">Update</button>
                 <button type="button" onclick="closeEditProductDialog()">Cancel</button>
@@ -161,7 +202,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 
 </html>

@@ -69,27 +69,15 @@ body {
 
 /* Content layout */
 .content-container {
-    padding-top: 70px;
-    display: flex;
-    height: calc(100vh - 70px);
-    gap: 20px;
-    padding: 70px 20px 20px 20px;
+    padding: 0;
+    height: auto;
 }
 
 /* Section styles */
 #addLogSection,
 #viewLogsSection {
-    flex: 1;
-    background: var(--section-bg);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    height: 100%;
-    overflow-y: auto;
-}
-
-#viewLogsSection {
-    flex: 2;
+    height: auto;
+    flex: none;
 }
 
 /* Form styles */
@@ -353,4 +341,108 @@ button:hover {
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.main-container {
+    display: flex;
+    height: calc(100vh - 70px);
+    margin-top: 70px;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--header-bg);
+    border-right: 1px solid var(--border-color);
+    padding: 20px 0;
+    flex-shrink: 0;
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-item {
+    padding: 15px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: var(--text-color);
+    transition: background-color 0.3s;
+}
+
+.nav-item:hover {
+    background-color: var(--table-row-hover);
+}
+
+.nav-item.active {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+}
+
+.nav-icon {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.tab-content {
+    display: none;
+    background-color: var(--section-bg);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.export-group {
+    background-color: var(--section-bg);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.export-group h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+/* Add these to your existing styles */
+select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--table-header-bg);
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+[data-theme="dark"] select {
+    background-color: #363636;
+    color: #ffffff;
+    border-color: #505050;
+}
+
+[data-theme="dark"] select:focus {
+    border-color: #6a6a6a;
+}
+
+select option {
+    padding: 8px;
 }
