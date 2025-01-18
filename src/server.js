@@ -4,6 +4,7 @@ const productionRoutes = require('./routes/productionRoutes');
 const productRoutes = require('./routes/productRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
 const unitTypeRoutes = require('./routes/unitTypeRoutes');
+const exportRoutes = require('./routes/exportRoutes');
 
 module.exports = function setupServer(db, mainWindow, publicPath) {
     const app = express();
@@ -29,11 +30,18 @@ module.exports = function setupServer(db, mainWindow, publicPath) {
         next();
     });
 
+    // Add logging middleware to debug routes
+    app.use((req, res, next) => {
+        console.log(`${req.method} ${req.url}`);
+        next();
+    });
+
     // Routes
     app.use('/api/production', productionRoutes(db, mainWindow));
     app.use('/api/products', productRoutes(db));
     app.use('/api/categories', categoryRoutes(db));
     app.use('/api/unit-types', unitTypeRoutes());
+    app.use('/api/export', exportRoutes(db, mainWindow));
 
     // Serve components
     app.get('/components/:name', (req, res) => {

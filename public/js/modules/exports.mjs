@@ -8,7 +8,7 @@ export async function exportProductionLogs() {
     }
 
     try {
-        const response = await fetch('/api/export-production-logs', {
+        const response = await fetch('/api/export/production-logs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ startDate, endDate })
@@ -28,14 +28,21 @@ export async function exportCategorySummary() {
     }
 
     try {
-        const response = await fetch('/api/export-category-summary', {
+        console.log('Sending export request for date:', date);
+        
+        const response = await fetch('/api/export/category-summary', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
             body: JSON.stringify({ date })
         });
 
+        console.log('Response status:', response.status);
         await handleExportResponse(response);
     } catch (error) {
+        console.error('Export error:', error);
         handleExportError('category summary', error);
     }
 }
@@ -48,7 +55,7 @@ export async function exportDetailedCategorySummary() {
     }
 
     try {
-        const response = await fetch('/api/export-detailed-category-summary', {
+        const response = await fetch('/api/export/detailed-category-summary', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ date })
@@ -61,18 +68,25 @@ export async function exportDetailedCategorySummary() {
 }
 
 async function handleExportResponse(response) {
-    if (!response.ok) {
-        throw new Error('Export failed');
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Invalid server response');
     }
-    const result = await response.json();
-    if (result.success) {
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+        throw new Error(data.error || 'Export failed');
+    }
+
+    if (data.success) {
         alert('Export completed successfully!');
     } else {
-        alert(result.message || 'Export failed');
+        throw new Error(data.message || 'Export failed');
     }
 }
 
 function handleExportError(type, error) {
     console.error(`Export failed:`, error);
-    alert(`Failed to export ${type}. Please try again.`);
+    alert(`Failed to export ${type}: ${error.message}`);
 } 

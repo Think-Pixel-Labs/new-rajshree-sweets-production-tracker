@@ -3,6 +3,7 @@ const path = require('path');
 const express = require('express');
 const Database = require('./config/database');
 const setupServer = require('./server');
+const fs = require('fs');
 
 let mainWindow;
 let db;
@@ -26,6 +27,12 @@ function getPublicPath() {
 }
 
 function createWindow() {
+    // Create exports directory if it doesn't exist
+    const exportsDir = path.join(process.cwd(), 'exports');
+    if (!fs.existsSync(exportsDir)) {
+        fs.mkdirSync(exportsDir);
+    }
+
     const dbPath = getDatabasePath();
     console.log('Attempting to open database at:', dbPath);
 
