@@ -33,11 +33,12 @@
   "devDependencies": {
     "@electron-forge/cli": "^7.6.0",
     "@electron-forge/maker-deb": "^7.6.0",
+    "@electron-forge/maker-dmg": "^7.6.0",
     "@electron-forge/maker-rpm": "^7.6.0",
     "@electron-forge/maker-squirrel": "^7.6.0",
     "@electron-forge/maker-zip": "^7.6.0",
-    "@electron-forge/maker-dmg": "^7.6.0",
     "@electron-forge/plugin-auto-unpack-natives": "^7.6.0",
+    "@electron-forge/publisher-github": "^7.6.0",
     "electron": "^32.0.1",
     "nodemon": "^3.1.4"
   },
@@ -55,7 +56,10 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "name": "production_tracker"
+            "name": "production_tracker",
+            "authors": "Think Pixel Labs",
+            "description": "Production tracker for New Rajshree Sweets",
+            "setupIcon": "./public/assets/logo.ico"
           }
         },
         {
@@ -66,7 +70,23 @@
         },
         {
           "name": "@electron-forge/maker-dmg",
-          "config": {}
+          "config": {
+            "icon": "./public/assets/logo.icns",
+            "background": "./public/assets/dmg-background.png",
+            "format": "ULFO"
+          }
+        }
+      ],
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "repository": {
+              "owner": "Think-Pixel-Digital-Media-Solutions",
+              "name": "new-rajshree-sweets-production-tracker"
+            },
+            "prerelease": false
+          }
         }
       ]
     }
