@@ -30,19 +30,19 @@ module.exports = function(db) {
 
     // Add new manufacturing unit
     router.post('/', handleErrors(async (req, res) => {
-        const { name, type } = req.body;
+        const { name } = req.body;
         
-        if (!name || !type) {
-            return res.status(400).json({ error: 'Name and type are required' });
+        if (!name || typeof name !== 'string' || name.trim() === '') {
+            return res.status(400).json({ error: 'A valid name is required' });
         }
 
-        const query = 'INSERT INTO manufacturingUnits (name, type) VALUES (?, ?)';
-        db.run(query, [name, type], function(err) {
+        const query = 'INSERT INTO manufacturingUnits (name) VALUES (?)';
+        db.run(query, [name.trim()], function(err) {
             if (err) {
                 console.error('Database error:', err);
                 return res.status(500).json({ error: err.message });
             }
-            res.json({ id: this.lastID, name, type });
+            res.json({ id: this.lastID, name: name.trim() });
         });
     }));
 

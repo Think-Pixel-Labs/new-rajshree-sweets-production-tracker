@@ -247,7 +247,7 @@ async function loadManufacturingUnits() {
         
         units.forEach(unit => {
             const li = document.createElement('li');
-            li.innerHTML = `<span>${unit.name} (${unit.type})</span>`;
+            li.innerHTML = `<span>${unit.name}</span>`;
             unitList.appendChild(li);
         });
 
@@ -273,16 +273,15 @@ async function loadManufacturingUnits() {
 async function addManufacturingUnit(event) {
     event.preventDefault();
     const nameInput = document.getElementById('newManufacturingUnitName');
-    const typeInput = document.getElementById('newManufacturingUnitType');
+    const name = nameInput.value.trim();
+    
+    if (!name) return;
     
     try {
         const response = await fetch('/api/manufacturing-units', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                name: nameInput.value,
-                type: typeInput.value
-            })
+            body: JSON.stringify({ name })
         });
 
         if (!response.ok) {
@@ -290,7 +289,6 @@ async function addManufacturingUnit(event) {
         }
 
         nameInput.value = '';
-        typeInput.value = '';
         await loadManufacturingUnits();
     } catch (error) {
         console.error('Error adding manufacturing unit:', error);
