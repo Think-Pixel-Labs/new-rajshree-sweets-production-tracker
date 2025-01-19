@@ -1,4 +1,5 @@
 import { fetchProductionData } from './productionLogs.mjs';
+import { showToast } from './toast.mjs';
 
 let products = [];
 
@@ -11,6 +12,7 @@ export async function fetchProducts() {
         return products;
     } catch (error) {
         console.error('Error fetching products:', error);
+        showToast('Failed to fetch products: ' + error.message, 'error');
         throw error;
     }
 }
@@ -64,7 +66,7 @@ export async function handleProductSubmit(event) {
     const logTypeId = document.getElementById('logType').value;
 
     if (!productId || !quantity || !logTypeId) {
-        alert('Please fill in all required fields');
+        showToast('Please fill in all required fields', 'error');
         return;
     }
 
@@ -84,6 +86,7 @@ export async function handleProductSubmit(event) {
             throw new Error(errorData.error || 'Failed to add production log');
         }
 
+        showToast('Production log added successfully', 'success');
         // Clear form
         event.target.reset();
         // Clear product search
@@ -101,7 +104,7 @@ export async function handleProductSubmit(event) {
         }
     } catch (error) {
         console.error('Error adding production log:', error);
-        alert(error.message);
+        showToast(error.message, 'error');
     }
 }
 

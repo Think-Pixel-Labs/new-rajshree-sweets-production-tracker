@@ -1,3 +1,5 @@
+import { showToast } from './toast.mjs';
+
 let categories = [];
 let unitTypes = [];
 let manufacturingUnits = [];
@@ -239,13 +241,14 @@ export async function handleProductFormSubmit(event) {
             throw new Error(errorData.error || 'Failed to add product');
         }
 
+        showToast('Product added successfully', 'success');
         event.target.reset();
         await loadProductTable();
         // Refresh the products in the production log dropdown
         await window.refreshProducts();
     } catch (error) {
         console.error('Error adding product:', error);
-        alert('Failed to add product: ' + error.message);
+        showToast(error.message, 'error');
     }
 }
 
@@ -296,7 +299,7 @@ export async function handleEditProductSubmit(event) {
     const productId = parseInt(dialog.dataset.productId);
     
     if (!productId || isNaN(productId)) {
-        alert('Cannot update product: Invalid product ID');
+        showToast('Cannot update product: Invalid product ID', 'error');
         return;
     }
 
@@ -306,7 +309,7 @@ export async function handleEditProductSubmit(event) {
     const manufacturingUnitId = parseInt(document.getElementById('editProductManufacturingUnit').value);
 
     if (!name || !categoryId || !unitId || !manufacturingUnitId) {
-        alert('All fields are required');
+        showToast('All fields are required', 'error');
         return;
     }
 
@@ -323,12 +326,13 @@ export async function handleEditProductSubmit(event) {
             throw new Error(errorData.error || 'Failed to update product');
         }
 
+        showToast('Product updated successfully', 'success');
         closeEditProductDialog();
         await loadProductTable();
         await window.refreshProducts();
     } catch (error) {
         console.error('Error updating product:', error);
-        alert('Failed to update product: ' + error.message);
+        showToast(error.message, 'error');
     }
 }
 
@@ -336,14 +340,14 @@ export async function deleteProduct(id) {
     // Enhanced validation for product ID
     if (id === undefined || id === null) {
         console.error('Product ID is missing');
-        alert('Cannot delete product: Missing product ID');
+        showToast('Cannot delete product: Missing product ID', 'error');
         return;
     }
     
     const productId = parseInt(id);
     if (isNaN(productId)) {
         console.error('Invalid product ID format:', id);
-        alert('Cannot delete product: Invalid product ID format');
+        showToast('Cannot delete product: Invalid product ID format', 'error');
         return;
     }
 
@@ -362,10 +366,11 @@ export async function deleteProduct(id) {
             throw new Error(errorData.error || 'Failed to delete product');
         }
 
+        showToast('Product deleted successfully', 'success');
         await loadProductTable();
         await window.refreshProducts();
     } catch (error) {
         console.error('Error deleting product:', error);
-        alert('Failed to delete product: ' + error.message);
+        showToast(error.message, 'error');
     }
 } 

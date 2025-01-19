@@ -1,3 +1,5 @@
+import { showToast } from './toast.mjs';
+
 let currentEditId = null;
 
 export async function fetchProductionData() {
@@ -14,6 +16,7 @@ export async function fetchProductionData() {
         updateProductionTable(data);
     } catch (error) {
         console.error('Error fetching production data:', error);
+        showToast('Failed to fetch production logs: ' + error.message, 'error');
         throw error;
     }
 }
@@ -21,7 +24,7 @@ export async function fetchProductionData() {
 export function handleFilterClick() {
     fetchProductionData().catch(error => {
         console.error('Filter error:', error);
-        alert('Failed to filter production logs');
+        showToast('Failed to filter production logs', 'error');
     });
 }
 
@@ -73,7 +76,7 @@ export async function handleEditSubmit(event) {
 
     if (!currentEditId) {
         console.error('No currentEditId found!');
-        alert('Error: No log selected for editing');
+        showToast('Error: No log selected for editing', 'error');
         return;
     }
 
@@ -91,11 +94,12 @@ export async function handleEditSubmit(event) {
 
         if (!response.ok) throw new Error('Failed to update log');
 
+        showToast('Production log updated successfully', 'success');
         closeEditDialog();
         await fetchProductionData();
     } catch (error) {
         console.error('Update error:', error);
-        alert('Failed to update production log');
+        showToast('Failed to update production log: ' + error.message, 'error');
     }
 }
 
@@ -111,10 +115,11 @@ export async function deleteLog(id) {
 
         if (!response.ok) throw new Error('Failed to delete log');
 
+        showToast('Production log deleted successfully', 'success');
         await fetchProductionData();
     } catch (error) {
         console.error('Delete error:', error);
-        alert('Failed to delete production log');
+        showToast('Failed to delete production log: ' + error.message, 'error');
     }
 }
 
