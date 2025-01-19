@@ -311,9 +311,12 @@ async function addManufacturingUnit(event) {
 
         nameInput.value = '';
         await loadManufacturingUnits();
+        // Refresh product management dropdowns
+        await initializeSelects();
+        showToast('Manufacturing unit added successfully', 'success');
     } catch (error) {
         console.error('Error adding manufacturing unit:', error);
-        alert('Failed to add manufacturing unit');
+        showToast('Failed to add manufacturing unit: ' + error.message, 'error');
     }
 }
 

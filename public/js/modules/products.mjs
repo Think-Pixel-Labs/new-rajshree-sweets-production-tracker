@@ -149,6 +149,16 @@ export async function handleProductSubmit(event) {
         // Reset and repopulate the dropdown with all products
         updateProductSelect();
         document.getElementById('unitTypeDisplay').textContent = '';
+        // Reset log type to default (PRODUCTION)
+        const logTypeSelect = document.getElementById('logType');
+        if (logTypeSelect) {
+            const defaultOption = Array.from(logTypeSelect.options).find(option => 
+                option.textContent.trim().toUpperCase() === 'PRODUCTION'
+            );
+            if (defaultOption) {
+                logTypeSelect.value = defaultOption.value;
+            }
+        }
 
         // Refresh production logs
         if (typeof window.fetchProductionData === 'function') {
