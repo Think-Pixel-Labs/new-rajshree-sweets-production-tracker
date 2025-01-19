@@ -52,7 +52,10 @@ window.refreshProducts = fetchProducts;
 window.fetchProductionData = fetchProductionData;
 
 function setDefaultDates() {
-    const today = new Date().toISOString().split('T')[0];
+    const date = new Date();
+    // Add 5 hours and 30 minutes for IST
+    date.setMinutes(date.getMinutes() + 330);
+    const today = date.toISOString().split('T')[0];
     document.getElementById('startDate').value = today;
     document.getElementById('endDate').value = today;
     document.getElementById('summaryDate').value = today;
