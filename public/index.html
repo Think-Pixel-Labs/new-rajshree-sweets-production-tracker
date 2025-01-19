@@ -46,6 +46,10 @@
                     <span class="nav-icon">📏</span>
                     Unit Type Management
                 </li>
+                <li class="nav-item" data-tab="manufacturing-unit-management">
+                    <span class="nav-icon">🏭</span>
+                    Manufacturing Unit Management
+                </li>
                 <li class="nav-item" data-tab="reports">
                     <span class="nav-icon">📈</span>
                     Reports
@@ -188,6 +192,26 @@
                 <div class="list-container">
                     <h3>Existing Unit Types</h3>
                     <ul id="unitTypeList" class="management-list"></ul>
+                </div>
+            </section>
+
+            <!-- Manufacturing Unit Management Tab -->
+            <section id="manufacturing-unit-management" class="tab-content">
+                <h2>Manufacturing Unit Management</h2>
+                <form id="manufacturingUnitForm" class="management-form">
+                    <div class="form-group">
+                        <label for="newManufacturingUnitName">Name:</label>
+                        <input type="text" id="newManufacturingUnitName" required placeholder="Enter manufacturing unit name">
+                    </div>
+                    <div class="form-group">
+                        <label for="newManufacturingUnitType">Type:</label>
+                        <input type="text" id="newManufacturingUnitType" required placeholder="Enter manufacturing unit type">
+                    </div>
+                    <button type="submit">Add Manufacturing Unit</button>
+                </form>
+                <div class="list-container">
+                    <h3>Existing Manufacturing Units</h3>
+                    <ul id="manufacturingUnitList" class="management-list"></ul>
                 </div>
             </section>
 

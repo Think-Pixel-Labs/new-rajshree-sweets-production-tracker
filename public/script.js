@@ -135,6 +135,9 @@ function setupEventListeners() {
             }
         });
     });
+
+    // Manufacturing Unit Management
+    document.getElementById('manufacturingUnitForm').addEventListener('submit', addManufacturingUnit);
 }
 
 // Category Management
@@ -231,6 +234,70 @@ async function handleUnitTypeSubmit(event) {
     }
 }
 
+// Manufacturing Unit Management
+async function loadManufacturingUnits() {
+    try {
+        const response = await fetch('/api/manufacturing-units');
+        if (!response.ok) {
+            throw new Error('Failed to fetch manufacturing units');
+        }
+        const units = await response.json();
+        const unitList = document.getElementById('manufacturingUnitList');
+        unitList.innerHTML = '';
+        
+        units.forEach(unit => {
+            const li = document.createElement('li');
+            li.innerHTML = `<span>${unit.name} (${unit.type})</span>`;
+            unitList.appendChild(li);
+        });
+
+        // Also update manufacturing unit dropdowns
+        const manufacturingUnitSelects = document.querySelectorAll('select[id*="manufacturingUnit"]');
+        manufacturingUnitSelects.forEach(select => {
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">Select Manufacturing Unit</option>';
+            units.forEach(unit => {
+                const option = document.createElement('option');
+                option.value = unit.id;
+                option.textContent = unit.name;
+                select.appendChild(option);
+            });
+            select.value = currentValue;
+        });
+    } catch (error) {
+        console.error('Error loading manufacturing units:', error);
+        alert('Failed to load manufacturing units');
+    }
+}
+
+async function addManufacturingUnit(event) {
+    event.preventDefault();
+    const nameInput = document.getElementById('newManufacturingUnitName');
+    const typeInput = document.getElementById('newManufacturingUnitType');
+    
+    try {
+        const response = await fetch('/api/manufacturing-units', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: nameInput.value,
+                type: typeInput.value
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to add manufacturing unit');
+        }
+
+        nameInput.value = '';
+        typeInput.value = '';
+        await loadManufacturingUnits();
+    } catch (error) {
+        console.error('Error adding manufacturing unit:', error);
+        alert('Failed to add manufacturing unit');
+    }
+}
+
 // Initialize application
 document.addEventListener('DOMContentLoaded', async () => {
     try {
@@ -251,6 +318,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         setupEventListeners();
         loadCategories();
         loadUnitTypes();
+        loadManufacturingUnits();
     } catch (error) {
         console.error('Initialization error:', error);
         alert('Failed to initialize application. Please refresh the page.');

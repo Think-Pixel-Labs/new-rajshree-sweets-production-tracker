@@ -18,14 +18,31 @@ module.exports = function(db) {
 
     // Get all manufacturing units
     router.get('/', handleErrors(async (req, res) => {
-        const query = `SELECT id, name FROM manufacturingUnits ORDER BY name`;
-        
+        const query = 'SELECT * FROM manufacturingUnits ORDER BY name';
         db.all(query, [], (err, rows) => {
             if (err) {
-                console.error('Manufacturing units retrieval error:', err);
-                throw err;
+                console.error('Database error:', err);
+                return res.status(500).json({ error: err.message });
             }
             res.json(rows);
+        });
+    }));
+
+    // Add new manufacturing unit
+    router.post('/', handleErrors(async (req, res) => {
+        const { name, type } = req.body;
+        
+        if (!name || !type) {
+            return res.status(400).json({ error: 'Name and type are required' });
+        }
+
+        const query = 'INSERT INTO manufacturingUnits (name, type) VALUES (?, ?)';
+        db.run(query, [name, type], function(err) {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).json({ error: err.message });
+            }
+            res.json({ id: this.lastID, name, type });
         });
     }));
 
