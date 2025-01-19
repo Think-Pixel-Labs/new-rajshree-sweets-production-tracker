@@ -140,7 +140,7 @@ async function loadCategories() {
         
         categories.forEach(category => {
             const li = document.createElement('li');
-            li.textContent = category;
+            li.textContent = category.name;
             categoryList.appendChild(li);
         });
     } catch (error) {
@@ -183,7 +183,7 @@ async function loadUnitTypes() {
         
         unitTypes.forEach(unitType => {
             const li = document.createElement('li');
-            li.textContent = unitType;
+            li.textContent = unitType.name;
             unitTypeList.appendChild(li);
         });
     } catch (error) {

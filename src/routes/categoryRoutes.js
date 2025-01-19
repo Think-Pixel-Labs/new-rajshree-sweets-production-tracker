@@ -4,36 +4,30 @@ const router = express.Router();
 module.exports = function(db) {
     // Get all categories
     router.get('/', (req, res) => {
-        const query = `SELECT DISTINCT category FROM products ORDER BY category`;
+        const query = `SELECT id, name FROM productCategories ORDER BY name`;
         db.all(query, [], (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
-            const categories = rows.map(row => row.category).filter(Boolean);
-            res.json(categories);
+            res.json(rows);
         });
     });
 
     // Add new category
     router.post('/', (req, res) => {
-        const { category } = req.body;
+        const { name } = req.body;
         
-        if (!category) {
+        if (!name) {
             return res.status(400).json({ error: 'Category name is required' });
         }
 
-        // Since categories are stored in the products table, we'll add a dummy product
-        // that serves as a category placeholder, using 'KG' as the default unit type
-        const query = `
-            INSERT INTO products (name, category, unitType) 
-            SELECT ?, ?, 'KG'
-            WHERE NOT EXISTS (
-                SELECT 1 FROM products WHERE category = ?
-            )
-            LIMIT 1
-        `;
+        const query = `INSERT INTO productCategories (name) VALUES (?)`;
 
-        db.run(query, [category, category, category], function(err) {
+        db.run(query, [name], function(err) {
             if (err) return res.status(500).json({ error: err.message });
-            res.json({ success: true });
+            res.json({ 
+                success: true, 
+                id: this.lastID,
+                name: name
+            });
         });
     });
 

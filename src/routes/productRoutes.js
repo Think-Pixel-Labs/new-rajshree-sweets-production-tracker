@@ -5,12 +5,16 @@ module.exports = function(db) {
     router.get('/', (req, res) => {
         const query = `
             SELECT 
-                id, 
-                name,
-                category,
-                unitType
-            FROM products 
-            ORDER BY name ASC`;
+                p.id, 
+                p.name,
+                pc.name as category,
+                ut.name as unit,
+                p.category as categoryId,
+                p.unit as unitId
+            FROM products p
+            LEFT JOIN productCategories pc ON p.category = pc.id
+            LEFT JOIN unitTypes ut ON p.unit = ut.id
+            ORDER BY p.name ASC`;
 
         db.all(query, (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
@@ -19,11 +23,15 @@ module.exports = function(db) {
     });
 
     router.post('/', (req, res) => {
-        const { name, category, unitType } = req.body;
+        const { name, categoryId, unitId } = req.body;
+
+        if (!name || !categoryId || !unitId) {
+            return res.status(400).json({ error: 'Name, category ID, and unit type ID are required' });
+        }
 
         db.run(
-            'INSERT INTO products (name, category, unitType) VALUES (?, ?, ?)',
-            [name, category, unitType],
+            'INSERT INTO products (name, category, unit) VALUES (?, ?, ?)',
+            [name, categoryId, unitId],
             function (err) {
                 if (err) return res.status(500).json({ error: err.message });
                 res.json({ id: this.lastID });
@@ -34,23 +42,23 @@ module.exports = function(db) {
     // Update product
     router.put('/:id', (req, res) => {
         const { id } = req.params;
-        const { name, category, unitType } = req.body;
+        const { name, categoryId, unitId } = req.body;
 
         // Log the request details for debugging
         console.log('Update product request:', {
             id,
             name,
-            category,
-            unitType,
+            categoryId,
+            unitId,
             params: req.params,
             body: req.body
         });
 
         // Validate input
-        if (!id || !name || !category || !unitType) {
+        if (!id || !name || !categoryId || !unitId) {
             return res.status(400).json({ 
                 error: 'Missing required fields',
-                received: { id, name, category, unitType }
+                received: { id, name, categoryId, unitId }
             });
         }
 
@@ -70,8 +78,8 @@ module.exports = function(db) {
 
             // Product exists, proceed with update
             db.run(
-                'UPDATE products SET name = ?, category = ?, unitType = ? WHERE id = ?',
-                [name, category, unitType, id],
+                'UPDATE products SET name = ?, category = ?, unit = ? WHERE id = ?',
+                [name, categoryId, unitId, id],
                 function (err) {
                     if (err) {
                         console.error('Error updating product:', err);
@@ -110,7 +118,7 @@ module.exports = function(db) {
             }
 
             // First delete related production logs
-            db.run('DELETE FROM productionLog WHERE productId = ?', [id], (err) => {
+            db.run('DELETE FROM productionLogs WHERE productId = ?', [id], (err) => {
                 if (err) {
                     db.run('ROLLBACK');
                     return res.status(500).json({ error: err.message });

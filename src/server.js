@@ -40,7 +40,7 @@ module.exports = function setupServer(db, mainWindow, publicPath) {
     app.use('/api/production', productionRoutes(db, mainWindow));
     app.use('/api/products', productRoutes(db));
     app.use('/api/categories', categoryRoutes(db));
-    app.use('/api/unit-types', unitTypeRoutes());
+    app.use('/api/unit-types', unitTypeRoutes(db));
     app.use('/api/export', exportRoutes(db, mainWindow));
 
     // Serve components

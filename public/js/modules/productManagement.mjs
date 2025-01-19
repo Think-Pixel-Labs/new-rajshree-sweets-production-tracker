@@ -34,9 +34,9 @@ function createCategorySelect(currentValue = '') {
 
     categories.forEach(category => {
         const option = document.createElement('option');
-        option.value = category;
-        option.textContent = category;
-        if (category === currentValue) {
+        option.value = category.id;
+        option.textContent = category.name;
+        if (category.id === currentValue) {
             option.selected = true;
         }
         select.appendChild(option);
@@ -56,9 +56,9 @@ function createUnitTypeSelect(currentValue = '') {
 
     unitTypes.forEach(unit => {
         const option = document.createElement('option');
-        option.value = unit;
-        option.textContent = unit;
-        if (unit === currentValue) {
+        option.value = unit.id;
+        option.textContent = unit.name;
+        if (unit.id === currentValue) {
             option.selected = true;
         }
         select.appendChild(option);
@@ -111,13 +111,10 @@ function updateProductTable(products) {
 
     tbody.innerHTML = '';
     products.forEach(product => {
-        // Log each product for debugging
-        console.log('Product in table:', product);
-
         const row = tbody.insertRow();
         row.insertCell(0).textContent = product.name;
         row.insertCell(1).textContent = product.category;
-        row.insertCell(2).textContent = product.unitType;
+        row.insertCell(2).textContent = product.unit;
 
         const actionsCell = row.insertCell(3);
         actionsCell.className = 'actions-cell';

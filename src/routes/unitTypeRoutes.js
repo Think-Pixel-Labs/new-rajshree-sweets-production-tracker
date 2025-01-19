@@ -1,32 +1,40 @@
 const express = require('express');
 const router = express.Router();
 
-// These are the only allowed unit types due to database constraint
-const UNIT_TYPES = ['KG', 'Pcs', 'Box', 'Bottle'];
-
-module.exports = function() {
+module.exports = function(db) {
+    // Get all unit types
     router.get('/', (req, res) => {
-        res.json(UNIT_TYPES);
+        const query = `SELECT id, name FROM unitTypes ORDER BY name`;
+        db.all(query, [], (err, rows) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json(rows);
+        });
     });
 
+    // Add new unit type
     router.post('/', (req, res) => {
-        const { unitType } = req.body;
+        const { name } = req.body;
         
-        if (!unitType) {
-            return res.status(400).json({ error: 'Unit type is required' });
+        if (!name) {
+            return res.status(400).json({ error: 'Unit type name is required' });
         }
 
-        // Convert to uppercase and check if it already exists
-        const newUnitType = unitType.toUpperCase();
-        
-        // Due to database constraints, we can only allow these specific unit types
-        if (!UNIT_TYPES.includes(newUnitType)) {
-            return res.status(400).json({ 
-                error: 'Invalid unit type. Allowed values are: ' + UNIT_TYPES.join(', ') 
+        const query = `INSERT INTO unitTypes (name) VALUES (?)`;
+
+        db.run(query, [name.toUpperCase()], function(err) {
+            if (err) {
+                // Check for unique constraint violation
+                if (err.message.includes('UNIQUE constraint failed')) {
+                    return res.status(400).json({ error: 'Unit type already exists' });
+                }
+                return res.status(500).json({ error: err.message });
+            }
+            res.json({ 
+                success: true, 
+                id: this.lastID,
+                name: name.toUpperCase()
             });
-        }
-
-        res.json({ success: true });
+        });
     });
 
     return router;

@@ -20,13 +20,15 @@ module.exports = function(db, mainWindow) {
                 SELECT 
                     p.name as productName,
                     pl.quantity,
-                    p.unitType,
-                    p.category,
+                    ut.name as unitType,
+                    pc.name as category,
                     pl.createdAt,
                     pl.updatedAt,
                     pl.updationReason
-                FROM productionLog pl
+                FROM productionLogs pl
                 JOIN products p ON pl.productId = p.id
+                LEFT JOIN productCategories pc ON p.category = pc.id
+                LEFT JOIN unitTypes ut ON p.unit = ut.id
                 WHERE DATE(pl.createdAt) BETWEEN DATE(?) AND DATE(?)
                 ORDER BY pl.createdAt DESC
             `;
@@ -69,7 +71,6 @@ module.exports = function(db, mainWindow) {
 
     // Export category summary
     router.post('/category-summary', async (req, res) => {
-        console.log('Category summary export request received:', req.body);
         const { date } = req.body;
         
         if (!date) {
@@ -79,16 +80,18 @@ module.exports = function(db, mainWindow) {
         try {
             const query = `
                 SELECT 
-                    p.category,
+                    pc.name as category,
                     SUM(pl.quantity) as totalQuantity,
-                    p.unitType,
+                    ut.name as unitType,
                     COUNT(DISTINCT p.id) as uniqueProducts,
                     COUNT(pl.id) as totalEntries
-                FROM productionLog pl
+                FROM productionLogs pl
                 JOIN products p ON pl.productId = p.id
+                LEFT JOIN productCategories pc ON p.category = pc.id
+                LEFT JOIN unitTypes ut ON p.unit = ut.id
                 WHERE DATE(pl.createdAt) = DATE(?)
-                GROUP BY p.category, p.unitType
-                ORDER BY p.category
+                GROUP BY pc.name, ut.name
+                ORDER BY pc.name
             `;
 
             db.all(query, [date], async (err, rows) => {
@@ -133,16 +136,18 @@ module.exports = function(db, mainWindow) {
         try {
             const query = `
                 SELECT 
-                    p.category,
+                    pc.name as category,
                     p.name as productName,
                     SUM(pl.quantity) as totalQuantity,
-                    p.unitType,
+                    ut.name as unitType,
                     COUNT(pl.id) as entries
-                FROM productionLog pl
+                FROM productionLogs pl
                 JOIN products p ON pl.productId = p.id
+                LEFT JOIN productCategories pc ON p.category = pc.id
+                LEFT JOIN unitTypes ut ON p.unit = ut.id
                 WHERE DATE(pl.createdAt) = DATE(?)
-                GROUP BY p.category, p.id
-                ORDER BY p.category, p.name
+                GROUP BY pc.name, p.id
+                ORDER BY pc.name, p.name
             `;
 
             db.all(query, [date], async (err, rows) => {
