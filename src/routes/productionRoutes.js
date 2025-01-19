@@ -62,6 +62,8 @@ module.exports = function(db, mainWindow) {
     // Get production logs
     router.get('/', handleErrors(async (req, res) => {
         const { startDate, endDate } = req.query;
+        console.log('Fetching production logs with dates:', { startDate, endDate }); // Debug log
+        
         let query = `
             SELECT 
                 pl.id,
@@ -73,8 +75,10 @@ module.exports = function(db, mainWindow) {
                 p.name as productName,
                 pc.name as category,
                 ut.name as unit,
-                mu.name as manufacturingUnit,
-                lt.type as logType
+                pl.manufacuringUnit as manufacuringUnit,
+                mu.name as manufacturingUnitName,
+                pl.logType as logType,
+                lt.type as logTypeName
             FROM productionLogs pl
             JOIN products p ON pl.productId = p.id
             LEFT JOIN productCategories pc ON p.category = pc.id
@@ -91,11 +95,15 @@ module.exports = function(db, mainWindow) {
 
         query += ' ORDER BY datetime(pl.createdAt) DESC';
 
+        console.log('Executing query:', query); // Debug log
+        console.log('With params:', params); // Debug log
+
         db.all(query, params, (err, rows) => {
             if (err) {
                 console.error('Production log retrieval error:', err);
                 throw err;
             }
+            console.log('Retrieved production logs:', rows); // Debug log
             res.json(rows);
         });
     }));

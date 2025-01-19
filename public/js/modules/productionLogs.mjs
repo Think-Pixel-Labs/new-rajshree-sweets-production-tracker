@@ -26,8 +26,11 @@ export function handleFilterClick() {
 }
 
 export function editLog(id, currentQuantity, currentManufacturingUnit, currentLogType) {
-    currentEditId = id;
+    console.log('editLog called with id:', id);
     const editDialog = document.getElementById('editDialog');
+    editDialog.dataset.currentEditId = id;
+    console.log('currentEditId stored in dialog:', editDialog.dataset.currentEditId);
+    
     const editQuantity = document.getElementById('editQuantity');
     const editManufacturingUnit = document.getElementById('editManufacturingUnit');
     const editLogType = document.getElementById('editLogType');
@@ -41,17 +44,30 @@ export function editLog(id, currentQuantity, currentManufacturingUnit, currentLo
 }
 
 export function closeEditDialog() {
-    document.getElementById('editDialog').style.display = 'none';
+    const editDialog = document.getElementById('editDialog');
+    editDialog.style.display = 'none';
+    editDialog.dataset.currentEditId = '';
 }
 
 export async function handleEditSubmit(event) {
     event.preventDefault();
+    const editDialog = document.getElementById('editDialog');
+    const currentEditId = editDialog.dataset.currentEditId;
+    console.log('handleEditSubmit called, currentEditId:', currentEditId);
+    
     const quantity = document.getElementById('editQuantity').value;
     const manufacturingUnitId = document.getElementById('editManufacturingUnit').value;
     const logTypeId = document.getElementById('editLogType').value;
     const reason = document.getElementById('editReason').value;
 
+    if (!currentEditId) {
+        console.error('No currentEditId found!');
+        alert('Error: No log selected for editing');
+        return;
+    }
+
     try {
+        console.log('Sending PUT request to:', `/api/production/${currentEditId}`);
         const response = await fetch(`/api/production/${currentEditId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
@@ -92,35 +108,29 @@ export async function deleteLog(id) {
     }
 }
 
-function updateProductionTable(data) {
-    const tbody = document.getElementById('productionData');
-    tbody.innerHTML = '';
-    data.forEach(item => {
-        const row = tbody.insertRow();
-        row.insertCell(0).textContent = item.id;
-        row.insertCell(1).textContent = formatDateTimeIndian(item.createdAt);
-        row.insertCell(2).textContent = item.productName;
-        row.insertCell(3).textContent = item.quantity;
-        row.insertCell(4).textContent = item.unit;
-        row.insertCell(5).textContent = item.category;
-        row.insertCell(6).textContent = item.manufacturingUnit || '-';
-        row.insertCell(7).textContent = item.logType || '-';
-        row.insertCell(8).textContent = item.updationReason || '-';
-        row.insertCell(9).textContent = item.updatedAt ? formatDateTimeIndian(item.updatedAt) : '-';
-        
-        const actionsCell = createActionsCell(item);
-        row.appendChild(actionsCell);
-    });
-}
-
 function createActionsCell(item) {
+    console.log('Creating actions cell for item:', item);
+    
     const actionsCell = document.createElement('td');
     actionsCell.className = 'actions-cell';
+
+    if (!item || !item.id) {
+        console.error('Invalid item data:', item);
+        return actionsCell;
+    }
 
     const editButton = document.createElement('button');
     editButton.textContent = 'Edit';
     editButton.className = 'action-button edit-button';
-    editButton.onclick = () => editLog(item.id, item.quantity, item.manufacturingUnit, item.logType);
+    editButton.onclick = () => {
+        console.log('Edit button clicked for item:', item);
+        editLog(
+            item.id, 
+            item.quantity, 
+            item.manufacuringUnit || '',
+            item.logType || ''
+        );
+    };
     actionsCell.appendChild(editButton);
 
     const deleteButton = document.createElement('button');
@@ -130,6 +140,29 @@ function createActionsCell(item) {
     actionsCell.appendChild(deleteButton);
 
     return actionsCell;
+}
+
+function updateProductionTable(data) {
+    console.log('Updating production table with data:', data);
+    const tbody = document.getElementById('productionData');
+    tbody.innerHTML = '';
+    data.forEach(item => {
+        console.log('Processing item:', item);
+        const row = tbody.insertRow();
+        row.insertCell(0).textContent = item.id;
+        row.insertCell(1).textContent = formatDateTimeIndian(item.createdAt);
+        row.insertCell(2).textContent = item.productName;
+        row.insertCell(3).textContent = item.quantity;
+        row.insertCell(4).textContent = item.unit;
+        row.insertCell(5).textContent = item.category;
+        row.insertCell(6).textContent = item.manufacturingUnitName || '-';
+        row.insertCell(7).textContent = item.logTypeName || '-';
+        row.insertCell(8).textContent = item.updationReason || '-';
+        row.insertCell(9).textContent = item.updatedAt ? formatDateTimeIndian(item.updatedAt) : '-';
+        
+        const actionsCell = createActionsCell(item);
+        row.appendChild(actionsCell);
+    });
 }
 
 export function formatDateTimeIndian(dateString) {
