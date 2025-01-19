@@ -31,12 +31,10 @@
     "sqlite3": "^5.1.7"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^7.6.0",
+    "@electron-forge/cli": "^7.2.0",
     "@electron-forge/maker-deb": "^7.6.0",
-    "@electron-forge/maker-dmg": "^7.6.0",
-    "@electron-forge/maker-rpm": "^7.6.0",
-    "@electron-forge/maker-squirrel": "^7.6.0",
-    "@electron-forge/maker-zip": "^7.6.0",
+    "@electron-forge/maker-squirrel": "^7.2.0",
+    "@electron-forge/maker-zip": "^7.2.0",
     "@electron-forge/plugin-auto-unpack-natives": "^7.6.0",
     "@electron-forge/publisher-github": "^7.6.0",
     "electron": "^32.0.1",
@@ -68,14 +66,6 @@
           "platforms": [
             "darwin"
           ]
-        },
-        {
-          "name": "@electron-forge/maker-dmg",
-          "config": {
-            "icon": "./public/assets/logo.icns",
-            "background": "./public/assets/dmg-background.png",
-            "format": "ULFO"
-          }
         }
       ],
       "publishers": [

@@ -5,14 +5,7 @@ module.exports = {
       './public/data/production.db',
       './public'
     ],
-    icon: './public/assets/logo',
-    osxSign: {
-      identity: null,
-      hardenedRuntime: true,
-      entitlements: 'entitlements.plist',
-      'entitlements-inherit': 'entitlements.plist',
-      'gatekeeper-assess': false
-    }
+    icon: './public/assets/logo'
   },
   rebuildConfig: {},
   makers: [
@@ -29,14 +22,7 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-zip',
-      platforms: ['darwin', 'win32']
-    },
-    {
-      name: '@electron-forge/maker-dmg',
-      platforms: ['darwin'],
-      config: {
-        format: 'ULFO'
-      }
+      platforms: ['win32']
     }
   ]
 }; 
