@@ -54,6 +54,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create DMG background
+        run: |
+          mkdir -p public/assets
+          # Install required packages
+          brew install imagemagick
+          # Create a simple white background
+          convert -size 540x380 xc:white public/assets/dmg-background.png
+
       - name: Build app
         run: npm run make
 
