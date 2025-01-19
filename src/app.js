@@ -26,11 +26,23 @@ function getPublicPath() {
     return path.join(__dirname, '..', 'public');
 }
 
+function getIconPath() {
+    const iconName = process.platform === 'darwin' ? 'logo.icns' : 'logo.ico';
+    if (app.isPackaged) {
+        return path.join(process.resourcesPath, 'public', 'assets', iconName);
+    }
+    return path.join(__dirname, '..', 'public', 'assets', iconName);
+}
+
+function getExportsPath() {
+    return path.join(app.getPath('userData'), 'exports');
+}
+
 function createWindow() {
     // Create exports directory if it doesn't exist
-    const exportsDir = path.join(process.cwd(), 'exports');
+    const exportsDir = getExportsPath();
     if (!fs.existsSync(exportsDir)) {
-        fs.mkdirSync(exportsDir);
+        fs.mkdirSync(exportsDir, { recursive: true });
     }
 
     const dbPath = getDatabasePath();
@@ -58,7 +70,7 @@ function createWindow() {
             webSecurity: true
         },
         title: "Production Tracker",
-        icon: path.join(__dirname, '..', 'public', 'assets', 'logo.ico'),
+        icon: getIconPath(),
         show: false,
         center: true
     });

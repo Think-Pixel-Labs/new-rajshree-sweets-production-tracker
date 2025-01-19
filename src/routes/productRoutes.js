@@ -5,19 +5,20 @@ module.exports = function(db) {
     router.get('/', (req, res) => {
         const query = `
             SELECT 
-                p.id, 
-                p.name,
+                p.id as id, 
+                p.name as name,
                 pc.name as category,
                 ut.name as unit,
-                p.category as categoryId,
-                p.unit as unitId
+                p.category as category_id,
+                p.unit as unit_id
             FROM products p
             LEFT JOIN productCategories pc ON p.category = pc.id
             LEFT JOIN unitTypes ut ON p.unit = ut.id
             ORDER BY p.name ASC`;
 
-        db.all(query, (err, rows) => {
+        db.all(query, [], (err, rows) => {
             if (err) return res.status(500).json({ error: err.message });
+            console.log('Products fetched:', rows); // Debug log
             res.json(rows);
         });
     });
