@@ -19,7 +19,9 @@ import {
 import { 
     exportProductionLogs,
     exportCategorySummary,
-    exportDetailedCategorySummary 
+    exportDetailedCategorySummary,
+    exportManufacturingUnitSummary,
+    exportDetailedManufacturingUnitSummary
 } from './js/modules/exports.mjs';
 import { 
     loadProductTable, 
@@ -41,6 +43,8 @@ window.closeEditDialog = closeEditDialog;
 window.exportProductionLogs = exportProductionLogs;
 window.exportCategorySummary = exportCategorySummary;
 window.exportDetailedCategorySummary = exportDetailedCategorySummary;
+window.exportManufacturingUnitSummary = exportManufacturingUnitSummary;
+window.exportDetailedManufacturingUnitSummary = exportDetailedManufacturingUnitSummary;
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.closeEditProductDialog = closeEditProductDialog;

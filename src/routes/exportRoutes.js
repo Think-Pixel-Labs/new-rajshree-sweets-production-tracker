@@ -194,5 +194,135 @@ module.exports = function(db, mainWindow) {
         }
     });
 
+    // Export manufacturing unit summary
+    router.post('/manufacturing-unit-summary', async (req, res) => {
+        const { date } = req.body;
+        
+        if (!date) {
+            return res.status(400).json({ error: 'Date is required' });
+        }
+        
+        try {
+            const query = `
+                SELECT 
+                    mu.name as manufacturingUnit,
+                    lt.type as logType,
+                    pc.name as category,
+                    COUNT(DISTINCT p.id) as uniqueProducts,
+                    SUM(pl.quantity) as totalQuantity,
+                    ut.name as unitType,
+                    COUNT(pl.id) as totalEntries
+                FROM productionLogs pl
+                JOIN products p ON pl.productId = p.id
+                LEFT JOIN manufacturingUnits mu ON pl.manufacuringUnit = mu.id
+                LEFT JOIN productionLogTypes lt ON pl.logType = lt.id
+                LEFT JOIN productCategories pc ON p.category = pc.id
+                LEFT JOIN unitTypes ut ON p.unit = ut.id
+                WHERE DATE(pl.createdAt) = DATE(?)
+                GROUP BY mu.name, lt.type, pc.name, ut.name
+                ORDER BY mu.name, lt.type, pc.name
+            `;
+
+            db.all(query, [date], async (err, rows) => {
+                if (err) {
+                    console.error('Database error:', err);
+                    return res.status(500).json({ error: err.message });
+                }
+
+                if (!rows || rows.length === 0) {
+                    return res.status(404).json({ error: 'No data found for the selected date' });
+                }
+
+                try {
+                    const defaultPath = path.join(electronApp.getPath('downloads'), 
+                        `manufacturing_unit_summary_${date}.csv`);
+                    
+                    const { filePath } = await dialog.showSaveDialog(mainWindow, {
+                        defaultPath: defaultPath,
+                        filters: [{ name: 'CSV Files', extensions: ['csv'] }]
+                    });
+
+                    if (!filePath) {
+                        return res.status(400).json({ error: 'Export cancelled by user' });
+                    }
+
+                    await exportToCSV(rows, filePath);
+                    res.json({ success: true, filename: path.basename(filePath) });
+                } catch (error) {
+                    console.error('File save error:', error);
+                    res.status(500).json({ error: 'Failed to save file' });
+                }
+            });
+        } catch (error) {
+            console.error('Export error:', error);
+            res.status(500).json({ error: error.message });
+        }
+    });
+
+    // Export detailed manufacturing unit summary
+    router.post('/detailed-manufacturing-unit-summary', async (req, res) => {
+        const { date } = req.body;
+        
+        if (!date) {
+            return res.status(400).json({ error: 'Date is required' });
+        }
+        
+        try {
+            const query = `
+                SELECT 
+                    mu.name as manufacturingUnit,
+                    lt.type as logType,
+                    pc.name as category,
+                    p.name as productName,
+                    SUM(pl.quantity) as totalQuantity,
+                    ut.name as unitType,
+                    COUNT(pl.id) as entries
+                FROM productionLogs pl
+                JOIN products p ON pl.productId = p.id
+                LEFT JOIN manufacturingUnits mu ON pl.manufacuringUnit = mu.id
+                LEFT JOIN productionLogTypes lt ON pl.logType = lt.id
+                LEFT JOIN productCategories pc ON p.category = pc.id
+                LEFT JOIN unitTypes ut ON p.unit = ut.id
+                WHERE DATE(pl.createdAt) = DATE(?)
+                GROUP BY mu.name, lt.type, pc.name, p.id
+                ORDER BY mu.name, lt.type, pc.name, p.name
+            `;
+
+            db.all(query, [date], async (err, rows) => {
+                if (err) {
+                    console.error('Database error:', err);
+                    return res.status(500).json({ error: err.message });
+                }
+
+                if (!rows || rows.length === 0) {
+                    return res.status(404).json({ error: 'No data found for the selected date' });
+                }
+
+                try {
+                    const defaultPath = path.join(electronApp.getPath('downloads'), 
+                        `detailed_manufacturing_unit_summary_${date}.csv`);
+                    
+                    const { filePath } = await dialog.showSaveDialog(mainWindow, {
+                        defaultPath: defaultPath,
+                        filters: [{ name: 'CSV Files', extensions: ['csv'] }]
+                    });
+
+                    if (!filePath) {
+                        return res.status(400).json({ error: 'Export cancelled by user' });
+                    }
+
+                    await exportToCSV(rows, filePath);
+                    res.json({ success: true, filename: path.basename(filePath) });
+                } catch (error) {
+                    console.error('File save error:', error);
+                    res.status(500).json({ error: 'Failed to save file' });
+                }
+            });
+        } catch (error) {
+            console.error('Export error:', error);
+            res.status(500).json({ error: error.message });
+        }
+    });
+
     return router;
 }; 

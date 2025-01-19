@@ -67,6 +67,46 @@ export async function exportDetailedCategorySummary() {
     }
 }
 
+export async function exportManufacturingUnitSummary() {
+    const date = document.getElementById('summaryDate').value;
+    if (!date) {
+        alert('Please select a date for the manufacturing unit summary');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/export/manufacturing-unit-summary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date })
+        });
+
+        await handleExportResponse(response);
+    } catch (error) {
+        handleExportError('manufacturing unit summary', error);
+    }
+}
+
+export async function exportDetailedManufacturingUnitSummary() {
+    const date = document.getElementById('summaryDate').value;
+    if (!date) {
+        alert('Please select a date for the detailed manufacturing unit summary');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/export/detailed-manufacturing-unit-summary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date })
+        });
+
+        await handleExportResponse(response);
+    } catch (error) {
+        handleExportError('detailed manufacturing unit summary', error);
+    }
+}
+
 async function handleExportResponse(response) {
     const contentType = response.headers.get('content-type');
     if (!contentType || !contentType.includes('application/json')) {
