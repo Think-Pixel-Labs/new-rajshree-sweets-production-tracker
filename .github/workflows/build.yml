@@ -13,8 +13,16 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v2
     
+    - name: Create assets directory
+      run: |
+        mkdir -p public/assets
+        
+    - name: Create placeholder DMG background
+      run: |
+        convert -size 540x380 xc:white public/assets/dmg-background.png
+
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -23,6 +31,11 @@ jobs:
 
     - name: Install dependencies
       run: npm ci
+
+    - name: Install ImageMagick
+      run: |
+        brew install imagemagick
+      if: runner.os == 'macOS'
 
     - name: Build app
       run: npm run make
