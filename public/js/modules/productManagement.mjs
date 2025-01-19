@@ -118,9 +118,15 @@ function updateProductTable(products) {
 
     tbody.innerHTML = '';
     products.forEach(product => {
-        // Validate product data
-        if (!product || typeof product.id === 'undefined') {
-            console.error('Invalid product data:', product);
+        // Enhanced product data validation
+        if (!product) {
+            console.error('Product object is null or undefined');
+            return;
+        }
+
+        // Ensure product.id exists and is not undefined/null
+        if (product.id === undefined || product.id === null) {
+            console.error('Product is missing ID:', product);
             return;
         }
 
@@ -135,17 +141,17 @@ function updateProductTable(products) {
         actionsCell.className = 'actions-cell';
 
         // Store the product ID in the row's data attribute
-        row.dataset.productId = product.id;
+        row.dataset.productId = product.id.toString(); // Ensure ID is stored as string
 
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
         editButton.className = 'action-button edit-button';
         editButton.onclick = () => {
             const productData = {
-                id: parseInt(product.id),
+                id: product.id, // Don't parse here, keep original value
                 name: product.name,
-                category_id: parseInt(product.category_id),
-                unit_id: parseInt(product.unit_id),
+                category_id: product.category_id,
+                unit_id: product.unit_id,
                 category: product.category,
                 unit: product.unit
             };
@@ -158,13 +164,8 @@ function updateProductTable(products) {
         deleteButton.textContent = 'Delete';
         deleteButton.className = 'action-button delete-button';
         deleteButton.onclick = () => {
-            const productId = parseInt(product.id);
-            if (!productId || isNaN(productId)) {
-                console.error('Invalid product ID:', product.id);
-                alert('Cannot delete product: Invalid product ID');
-                return;
-            }
-            console.log('Delete button clicked for product ID:', productId);
+            const productId = product.id; // Don't parse here, keep original value
+            console.log('Delete button clicked for product:', { id: productId, product });
             deleteProduct(productId);
         };
         actionsCell.appendChild(deleteButton);
@@ -276,9 +277,17 @@ export async function handleEditProductSubmit(event) {
 }
 
 export async function deleteProduct(id) {
-    if (!id || isNaN(id)) {
-        console.error('Invalid product ID for deletion:', id);
-        alert('Cannot delete product: Invalid product ID');
+    // Enhanced validation for product ID
+    if (id === undefined || id === null) {
+        console.error('Product ID is missing');
+        alert('Cannot delete product: Missing product ID');
+        return;
+    }
+    
+    const productId = parseInt(id);
+    if (isNaN(productId)) {
+        console.error('Invalid product ID format:', id);
+        alert('Cannot delete product: Invalid product ID format');
         return;
     }
 
@@ -287,8 +296,8 @@ export async function deleteProduct(id) {
     }
 
     try {
-        console.log('Deleting product with ID:', id);
-        const response = await fetch(`/api/products/${id}`, {
+        console.log('Deleting product with ID:', productId);
+        const response = await fetch(`/api/products/${productId}`, {
             method: 'DELETE'
         });
 
