@@ -22,6 +22,8 @@ module.exports = function(db, mainWindow) {
                     pl.quantity,
                     ut.name as unitType,
                     pc.name as category,
+                    mu.name as manufacturingUnit,
+                    lt.type as logType,
                     pl.createdAt,
                     pl.updatedAt,
                     pl.updationReason
@@ -29,6 +31,8 @@ module.exports = function(db, mainWindow) {
                 JOIN products p ON pl.productId = p.id
                 LEFT JOIN productCategories pc ON p.category = pc.id
                 LEFT JOIN unitTypes ut ON p.unit = ut.id
+                LEFT JOIN manufacturingUnits mu ON pl.manufacuringUnit = mu.id
+                LEFT JOIN productionLogTypes lt ON pl.logType = lt.id
                 WHERE DATE(pl.createdAt) BETWEEN DATE(?) AND DATE(?)
                 ORDER BY pl.createdAt DESC
             `;
@@ -81,6 +85,7 @@ module.exports = function(db, mainWindow) {
             const query = `
                 SELECT 
                     pc.name as category,
+                    lt.type as logType,
                     SUM(pl.quantity) as totalQuantity,
                     ut.name as unitType,
                     COUNT(DISTINCT p.id) as uniqueProducts,
@@ -89,9 +94,10 @@ module.exports = function(db, mainWindow) {
                 JOIN products p ON pl.productId = p.id
                 LEFT JOIN productCategories pc ON p.category = pc.id
                 LEFT JOIN unitTypes ut ON p.unit = ut.id
+                LEFT JOIN productionLogTypes lt ON pl.logType = lt.id
                 WHERE DATE(pl.createdAt) = DATE(?)
-                GROUP BY pc.name, ut.name
-                ORDER BY pc.name
+                GROUP BY pc.name, lt.type, ut.name
+                ORDER BY pc.name, lt.type
             `;
 
             db.all(query, [date], async (err, rows) => {
@@ -138,6 +144,7 @@ module.exports = function(db, mainWindow) {
                 SELECT 
                     pc.name as category,
                     p.name as productName,
+                    lt.type as logType,
                     SUM(pl.quantity) as totalQuantity,
                     ut.name as unitType,
                     COUNT(pl.id) as entries
@@ -145,9 +152,10 @@ module.exports = function(db, mainWindow) {
                 JOIN products p ON pl.productId = p.id
                 LEFT JOIN productCategories pc ON p.category = pc.id
                 LEFT JOIN unitTypes ut ON p.unit = ut.id
+                LEFT JOIN productionLogTypes lt ON pl.logType = lt.id
                 WHERE DATE(pl.createdAt) = DATE(?)
-                GROUP BY pc.name, p.id
-                ORDER BY pc.name, p.name
+                GROUP BY pc.name, p.id, lt.type
+                ORDER BY pc.name, p.name, lt.type
             `;
 
             db.all(query, [date], async (err, rows) => {
