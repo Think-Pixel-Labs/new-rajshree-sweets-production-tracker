@@ -32,20 +32,73 @@ function updateProductSelect() {
 
 export function filterProducts(searchText) {
     const productSelect = document.getElementById('productSelect');
-    productSelect.innerHTML = '<option value="">Select a product</option>';
+    const suggestionsContainer = document.getElementById('searchSuggestions');
+    
+    // Clear previous suggestions
+    suggestionsContainer.innerHTML = '';
+    
+    if (!searchText.trim()) {
+        suggestionsContainer.classList.remove('active');
+        updateProductSelect(); // Show all products in the select
+        return;
+    }
 
-    const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        product.category.toLowerCase().includes(searchText.toLowerCase())
+    const searchLower = searchText.toLowerCase();
+    const filteredProducts = products.filter(product => 
+        product.name.toLowerCase().includes(searchLower) ||
+        (product.category && product.category.toLowerCase().includes(searchLower)) ||
+        (product.unit && product.unit.toLowerCase().includes(searchLower))
     );
 
-    filteredProducts.forEach(product => {
-        const option = document.createElement('option');
-        option.value = product.id;
-        option.textContent = `[${product.id}] ${product.name} (${product.category})`;
-        productSelect.appendChild(option);
-    });
+    if (filteredProducts.length === 0) {
+        const noResults = document.createElement('div');
+        noResults.className = 'suggestion-item';
+        noResults.textContent = 'No matching products found';
+        suggestionsContainer.appendChild(noResults);
+    } else {
+        filteredProducts.forEach(product => {
+            const suggestion = document.createElement('div');
+            suggestion.className = 'suggestion-item';
+
+            // Create main product name with highlighting
+            const nameText = product.name;
+            const nameHtml = nameText.replace(
+                new RegExp(searchText, 'gi'),
+                match => `<span class="highlight">${match}</span>`
+            );
+
+            // Create details line
+            const details = document.createElement('span');
+            details.className = 'details';
+            details.textContent = `Category: ${product.category || 'No Category'} | Unit: ${product.unit || 'No Unit'}`;
+
+            suggestion.innerHTML = nameHtml;
+            suggestion.appendChild(details);
+
+            // Add click handler
+            suggestion.addEventListener('click', () => {
+                productSelect.value = product.id;
+                productSelect.dispatchEvent(new Event('change'));
+                suggestionsContainer.classList.remove('active');
+                document.getElementById('productSearch').value = product.name;
+            });
+
+            suggestionsContainer.appendChild(suggestion);
+        });
+    }
+
+    suggestionsContainer.classList.add('active');
 }
+
+// Add click outside handler to close suggestions
+document.addEventListener('click', (event) => {
+    const suggestionsContainer = document.getElementById('searchSuggestions');
+    const searchInput = document.getElementById('productSearch');
+    
+    if (!event.target.closest('.search-controls')) {
+        suggestionsContainer.classList.remove('active');
+    }
+});
 
 export function getProduct(id) {
     return products.find(p => p.id == id);
@@ -110,9 +163,12 @@ export async function handleProductSubmit(event) {
 
 export function clearProductSearch() {
     const searchInput = document.getElementById('productSearch');
+    const suggestionsContainer = document.getElementById('searchSuggestions');
+    
     if (searchInput) {
         searchInput.value = '';
-        filterProducts('');
+        suggestionsContainer.classList.remove('active');
+        updateProductSelect(); // Reset to show all products
         searchInput.focus();
     }
 } 
