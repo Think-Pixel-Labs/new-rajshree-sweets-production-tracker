@@ -47,7 +47,8 @@ export function filterProducts(searchText) {
     const filteredProducts = products.filter(product => 
         product.name.toLowerCase().includes(searchLower) ||
         (product.category && product.category.toLowerCase().includes(searchLower)) ||
-        (product.unit && product.unit.toLowerCase().includes(searchLower))
+        (product.unit && product.unit.toLowerCase().includes(searchLower)) ||
+        (product.manufacturing_unit_name && product.manufacturing_unit_name.toLowerCase().includes(searchLower))
     );
 
     if (filteredProducts.length === 0) {
@@ -70,7 +71,7 @@ export function filterProducts(searchText) {
             // Create details line
             const details = document.createElement('span');
             details.className = 'details';
-            details.textContent = `Category: ${product.category || 'No Category'} | Unit: ${product.unit || 'No Unit'}`;
+            details.textContent = `Category: ${product.category || 'No Category'} | Unit: ${product.unit || 'No Unit'} | Manufacturing Unit: ${product.manufacturing_unit_name || 'No Manufacturing Unit'}`;
 
             suggestion.innerHTML = nameHtml;
             suggestion.appendChild(details);
