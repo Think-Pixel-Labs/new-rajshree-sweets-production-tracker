@@ -26,19 +26,42 @@ export function handleFilterClick() {
 }
 
 export function editLog(id, currentQuantity, currentManufacturingUnit, currentLogType) {
-    console.log('editLog called with id:', id);
+    console.log('editLog called with:', {
+        id,
+        currentQuantity,
+        currentManufacturingUnit,
+        currentLogType
+    });
+    
     const editDialog = document.getElementById('editDialog');
     editDialog.dataset.currentEditId = id;
-    console.log('currentEditId stored in dialog:', editDialog.dataset.currentEditId);
     
     const editQuantity = document.getElementById('editQuantity');
     const editManufacturingUnit = document.getElementById('editManufacturingUnit');
     const editLogType = document.getElementById('editLogType');
     const editReason = document.getElementById('editReason');
 
+    // Set values
     editQuantity.value = currentQuantity;
-    editManufacturingUnit.value = currentManufacturingUnit;
-    editLogType.value = currentLogType;
+    
+    // Pre-select manufacturing unit
+    if (editManufacturingUnit) {
+        Array.from(editManufacturingUnit.options).forEach(option => {
+            if (option.value === currentManufacturingUnit) {
+                option.selected = true;
+            }
+        });
+    }
+
+    // Pre-select log type
+    if (editLogType) {
+        Array.from(editLogType.options).forEach(option => {
+            if (option.value === currentLogType) {
+                option.selected = true;
+            }
+        });
+    }
+
     editReason.value = '';
     editDialog.style.display = 'block';
 }
@@ -166,12 +189,15 @@ function updateProductionTable(data) {
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
         editButton.className = 'action-button edit-button';
-        editButton.onclick = () => editLog(
-            item.productionId || item.id,
-            item.quantity,
-            item.manufacturingUnitId,
-            item.logTypeId
-        );
+        editButton.onclick = () => {
+            console.log('Edit clicked for item:', item);
+            editLog(
+                item.productionId || item.id,
+                item.quantity,
+                item.manufacturingUnitId,
+                item.logTypeId
+            );
+        };
         actionsCell.appendChild(editButton);
 
         const deleteButton = document.createElement('button');
