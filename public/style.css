@@ -191,7 +191,8 @@ body {
 
 /* Table styles */
 #productionTable,
-#productTable {
+#productTable,
+.management-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
@@ -205,15 +206,16 @@ body {
 #productionTable th,
 #productionTable td,
 #productTable th,
-#productTable td {
-    padding: 14px;
-    border-bottom: 1px solid var(--border-color);
+#productTable td,
+.management-table th,
+.management-table td {
+    padding: 14px 16px;
     text-align: left;
+    border-bottom: 1px solid var(--border-color);
     white-space: normal;
     word-wrap: break-word;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-width: 100px;
 }
 
 /* Column specific widths */
@@ -265,11 +267,86 @@ body {
     min-width: 160px;
 }
 
-#productionTable th:last-child, /* Actions */
-#productionTable td:last-child {
-    width: 120px;
-    min-width: 120px;
+/* Table header styles */
+#productionTable th,
+#productTable th,
+.management-table th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+    font-weight: 500;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+/* Action buttons styling */
+.actions-cell {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    padding: 8px;
+}
+
+.action-button {
+    min-width: 80px;
+    padding: 10px 16px;
+    margin: 0 4px;
+    font-size: 14px;
+    border-radius: var(--radius-md);
+    font-weight: 500;
+}
+
+/* Actions column width */
+#productionTable th:last-child,
+#productionTable td:last-child,
+#productTable th:last-child,
+#productTable td:last-child {
+    width: 200px;
+    min-width: 200px;
     text-align: center;
+    padding: 14px 16px;
+}
+
+/* Alternating row colors */
+#productionTable tbody tr,
+#productTable tbody tr,
+.management-table tbody tr {
+    background-color: var(--table-row-bg);
+    transition: var(--transition);
+}
+
+#productionTable tbody tr:nth-child(even),
+#productTable tbody tr:nth-child(even),
+.management-table tbody tr:nth-child(even) {
+    background-color: var(--table-row-alt-bg);
+}
+
+#productionTable tbody tr:hover,
+#productTable tbody tr:hover,
+.management-table tbody tr:hover {
+    background-color: var(--table-row-hover);
+}
+
+/* Dark mode table styles */
+[data-theme="dark"] #productionTable,
+[data-theme="dark"] #productTable,
+[data-theme="dark"] .management-table {
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] #productionTable th,
+[data-theme="dark"] #productTable th,
+[data-theme="dark"] .management-table th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+}
+
+[data-theme="dark"] #productionTable td,
+[data-theme="dark"] #productTable td,
+[data-theme="dark"] .management-table td {
+    border-color: var(--border-color);
 }
 
 /* Make table scrollable horizontally on smaller screens */
@@ -292,20 +369,6 @@ body {
     position: sticky;
     top: 0;
     z-index: 10;
-}
-
-/* Action buttons container */
-.actions-cell {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-    flex-wrap: nowrap;
-}
-
-.action-button {
-    min-width: 70px;
-    padding: 6px 12px;
-    margin: 0;
 }
 
 /* Button styles */
@@ -337,8 +400,12 @@ button:hover {
 }
 
 .delete-button {
-    background-color: #ff4444;
+    background-color: #dc3545;
     color: white;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
 }
 
 /* Modal styles */
@@ -991,62 +1058,4 @@ select option {
 
 [data-theme="dark"] .toast-close {
     color: var(--text-color);
-}
-
-.management-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin-top: 20px;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    overflow: hidden;
-}
-
-.management-table th,
-.management-table td {
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.management-table th {
-    background-color: var(--table-header-bg);
-    color: var(--table-header-text);
-    font-weight: 500;
-}
-
-.management-table th:first-child {
-    width: 80px;
-}
-
-.management-table tr:last-child td {
-    border-bottom: none;
-}
-
-.management-table tbody tr {
-    background-color: var(--table-row-bg);
-    transition: var(--transition);
-}
-
-.management-table tbody tr:nth-child(even) {
-    background-color: var(--table-row-alt-bg);
-}
-
-.management-table tbody tr:hover {
-    background-color: var(--table-row-hover);
-}
-
-/* Dark mode styles for management tables */
-[data-theme="dark"] .management-table {
-    border-color: var(--border-color);
-}
-
-[data-theme="dark"] .management-table th {
-    background-color: var(--table-header-bg);
-    color: var(--table-header-text);
-}
-
-[data-theme="dark"] .management-table td {
-    border-color: var(--border-color);
 }
