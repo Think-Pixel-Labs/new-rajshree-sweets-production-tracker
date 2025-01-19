@@ -8,7 +8,7 @@ export async function exportProductionLogs() {
     }
 
     try {
-        const response = await fetch('/api/export-production-logs', {
+        const response = await fetch('/api/export/production-logs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ startDate, endDate })
@@ -28,7 +28,7 @@ export async function exportCategorySummary() {
     }
 
     try {
-        const response = await fetch('/api/export-category-summary', {
+        const response = await fetch('/api/export/category-summary', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ date })
