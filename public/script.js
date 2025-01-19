@@ -149,9 +149,16 @@ async function loadCategories() {
         categoryList.innerHTML = '';
         
         categories.forEach(category => {
-            const li = document.createElement('li');
-            li.textContent = category.name;
-            categoryList.appendChild(li);
+            const row = document.createElement('tr');
+            const idCell = document.createElement('td');
+            const nameCell = document.createElement('td');
+            
+            idCell.textContent = category.id;
+            nameCell.textContent = category.name;
+            
+            row.appendChild(idCell);
+            row.appendChild(nameCell);
+            categoryList.appendChild(row);
         });
     } catch (error) {
         console.error('Error loading categories:', error);
@@ -196,9 +203,16 @@ async function loadUnitTypes() {
         unitTypeList.innerHTML = '';
         
         unitTypes.forEach(unitType => {
-            const li = document.createElement('li');
-            li.textContent = unitType.name;
-            unitTypeList.appendChild(li);
+            const row = document.createElement('tr');
+            const idCell = document.createElement('td');
+            const nameCell = document.createElement('td');
+            
+            idCell.textContent = unitType.id;
+            nameCell.textContent = unitType.name;
+            
+            row.appendChild(idCell);
+            row.appendChild(nameCell);
+            unitTypeList.appendChild(row);
         });
     } catch (error) {
         console.error('Error loading unit types:', error);
@@ -246,9 +260,16 @@ async function loadManufacturingUnits() {
         unitList.innerHTML = '';
         
         units.forEach(unit => {
-            const li = document.createElement('li');
-            li.innerHTML = `<span>${unit.name}</span>`;
-            unitList.appendChild(li);
+            const row = document.createElement('tr');
+            const idCell = document.createElement('td');
+            const nameCell = document.createElement('td');
+            
+            idCell.textContent = unit.id;
+            nameCell.textContent = unit.name;
+            
+            row.appendChild(idCell);
+            row.appendChild(nameCell);
+            unitList.appendChild(row);
         });
 
         // Also update manufacturing unit dropdowns
@@ -259,7 +280,7 @@ async function loadManufacturingUnits() {
             units.forEach(unit => {
                 const option = document.createElement('option');
                 option.value = unit.id;
-                option.textContent = unit.name;
+                option.textContent = `[${unit.id}] ${unit.name}`;
                 select.appendChild(option);
             });
             select.value = currentValue;

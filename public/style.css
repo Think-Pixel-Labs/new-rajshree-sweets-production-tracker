@@ -992,3 +992,61 @@ select option {
 [data-theme="dark"] .toast-close {
     color: var(--text-color);
 }
+
+.management-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.management-table th,
+.management-table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.management-table th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+    font-weight: 500;
+}
+
+.management-table th:first-child {
+    width: 80px;
+}
+
+.management-table tr:last-child td {
+    border-bottom: none;
+}
+
+.management-table tbody tr {
+    background-color: var(--table-row-bg);
+    transition: var(--transition);
+}
+
+.management-table tbody tr:nth-child(even) {
+    background-color: var(--table-row-alt-bg);
+}
+
+.management-table tbody tr:hover {
+    background-color: var(--table-row-hover);
+}
+
+/* Dark mode styles for management tables */
+[data-theme="dark"] .management-table {
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .management-table th {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+}
+
+[data-theme="dark"] .management-table td {
+    border-color: var(--border-color);
+}
