@@ -104,6 +104,116 @@ function setupEventListeners() {
     if (editProductForm) {
         editProductForm.addEventListener('submit', handleEditProductSubmit);
     }
+
+    // Category management
+    const categoryForm = document.getElementById('categoryForm');
+    if (categoryForm) {
+        categoryForm.addEventListener('submit', handleCategorySubmit);
+    }
+
+    // Unit type management
+    const unitTypeForm = document.getElementById('unitTypeForm');
+    if (unitTypeForm) {
+        unitTypeForm.addEventListener('submit', handleUnitTypeSubmit);
+    }
+
+    // Load data when tabs are clicked
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            const tab = item.getAttribute('data-tab');
+            if (tab === 'category-management') {
+                loadCategories();
+            } else if (tab === 'unit-type-management') {
+                loadUnitTypes();
+            }
+        });
+    });
+}
+
+// Category Management
+async function loadCategories() {
+    try {
+        const response = await fetch('/api/categories');
+        const categories = await response.json();
+        const categoryList = document.getElementById('categoryList');
+        categoryList.innerHTML = '';
+        
+        categories.forEach(category => {
+            const li = document.createElement('li');
+            li.textContent = category;
+            categoryList.appendChild(li);
+        });
+    } catch (error) {
+        console.error('Error loading categories:', error);
+    }
+}
+
+async function handleCategorySubmit(event) {
+    event.preventDefault();
+    const categoryInput = document.getElementById('newCategory');
+    const category = categoryInput.value.trim();
+    
+    if (!category) return;
+
+    try {
+        const response = await fetch('/api/categories', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ category })
+        });
+
+        if (response.ok) {
+            categoryInput.value = '';
+            await loadCategories();
+        } else {
+            console.error('Failed to add category');
+        }
+    } catch (error) {
+        console.error('Error adding category:', error);
+    }
+}
+
+// Unit Type Management
+async function loadUnitTypes() {
+    try {
+        const response = await fetch('/api/unit-types');
+        const unitTypes = await response.json();
+        const unitTypeList = document.getElementById('unitTypeList');
+        unitTypeList.innerHTML = '';
+        
+        unitTypes.forEach(unitType => {
+            const li = document.createElement('li');
+            li.textContent = unitType;
+            unitTypeList.appendChild(li);
+        });
+    } catch (error) {
+        console.error('Error loading unit types:', error);
+    }
+}
+
+async function handleUnitTypeSubmit(event) {
+    event.preventDefault();
+    const unitTypeInput = document.getElementById('newUnitType');
+    const unitType = unitTypeInput.value.trim();
+    
+    if (!unitType) return;
+
+    try {
+        const response = await fetch('/api/unit-types', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ unitType })
+        });
+
+        if (response.ok) {
+            unitTypeInput.value = '';
+            await loadUnitTypes();
+        } else {
+            console.error('Failed to add unit type');
+        }
+    } catch (error) {
+        console.error('Error adding unit type:', error);
+    }
 }
 
 // Initialize application
@@ -122,6 +232,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         setTheme(savedTheme);
 
         setupEventListeners();
+        loadCategories();
+        loadUnitTypes();
     } catch (error) {
         console.error('Initialization error:', error);
         alert('Failed to initialize application. Please refresh the page.');

@@ -38,6 +38,14 @@
                     <span class="nav-icon">📦</span>
                     Product Management
                 </li>
+                <li class="nav-item" data-tab="category-management">
+                    <span class="nav-icon">🏷️</span>
+                    Category Management
+                </li>
+                <li class="nav-item" data-tab="unit-type-management">
+                    <span class="nav-icon">📏</span>
+                    Unit Type Management
+                </li>
                 <li class="nav-item" data-tab="reports">
                     <span class="nav-icon">📈</span>
                     Reports
@@ -135,6 +143,38 @@
                     </thead>
                     <tbody id="productTableBody"></tbody>
                 </table>
+            </section>
+
+            <!-- Category Management Tab -->
+            <section id="category-management" class="tab-content">
+                <h2>Category Management</h2>
+                <form id="categoryForm" class="management-form">
+                    <div class="form-group">
+                        <label for="newCategory">New Category Name:</label>
+                        <input type="text" id="newCategory" required placeholder="Enter new category name">
+                    </div>
+                    <button type="submit">Add Category</button>
+                </form>
+                <div class="list-container">
+                    <h3>Existing Categories</h3>
+                    <ul id="categoryList" class="management-list"></ul>
+                </div>
+            </section>
+
+            <!-- Unit Type Management Tab -->
+            <section id="unit-type-management" class="tab-content">
+                <h2>Unit Type Management</h2>
+                <form id="unitTypeForm" class="management-form">
+                    <div class="form-group">
+                        <label for="newUnitType">New Unit Type:</label>
+                        <input type="text" id="newUnitType" required placeholder="Enter new unit type">
+                    </div>
+                    <button type="submit">Add Unit Type</button>
+                </form>
+                <div class="list-container">
+                    <h3>Existing Unit Types</h3>
+                    <ul id="unitTypeList" class="management-list"></ul>
+                </div>
             </section>
 
             <!-- Reports Tab -->
