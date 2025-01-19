@@ -149,7 +149,8 @@ function updateProductionTable(data) {
     data.forEach(item => {
         console.log('Processing item:', item);
         const row = tbody.insertRow();
-        row.insertCell(0).textContent = item.id;
+        console.log('Item ID:', item.id, 'Full item:', item);
+        row.insertCell(0).textContent = item.productionId || item.id || '-';
         row.insertCell(1).textContent = formatDateTimeIndian(item.createdAt);
         row.insertCell(2).textContent = item.productName;
         row.insertCell(3).textContent = item.quantity;
@@ -160,8 +161,24 @@ function updateProductionTable(data) {
         row.insertCell(8).textContent = item.updationReason || '-';
         row.insertCell(9).textContent = item.updatedAt ? formatDateTimeIndian(item.updatedAt) : '-';
         
-        const actionsCell = createActionsCell(item);
-        row.appendChild(actionsCell);
+        // Create actions cell
+        const actionsCell = row.insertCell(10);
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.className = 'action-button edit-button';
+        editButton.onclick = () => editLog(
+            item.productionId || item.id,
+            item.quantity,
+            item.manufacturingUnitId,
+            item.logTypeId
+        );
+        actionsCell.appendChild(editButton);
+
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.className = 'action-button delete-button';
+        deleteButton.onclick = () => deleteLog(item.productionId || item.id);
+        actionsCell.appendChild(deleteButton);
     });
 }
 
