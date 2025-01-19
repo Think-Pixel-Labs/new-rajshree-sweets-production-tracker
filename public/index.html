@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval'">
     <title>Production Tracker</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -22,38 +23,112 @@
         </div>
     </header>
 
-    <main class="content-container">
-        <section id="addLogSection">
-            <h2>Add Production Log</h2>
-            <form id="productionForm">
-                <div class="form-group">
-                    <label for="productSearch">Search Product:</label>
-                    <div class="select-container">
-                        <div class="search-controls">
-                            <input type="text" id="productSearch" class="product-search"
-                                placeholder="Type to search products...">
-                            <button type="button" class="icon-button clear-button" title="Clear search"
-                                onclick="clearProductSearch()">✕</button>
+    <div class="main-container">
+        <nav class="sidebar">
+            <ul class="nav-menu">
+                <li class="nav-item" data-tab="production-log">
+                    <span class="nav-icon">📝</span>
+                    Production Log
+                </li>
+                <li class="nav-item" data-tab="view-logs">
+                    <span class="nav-icon">📊</span>
+                    View Logs
+                </li>
+                <li class="nav-item" data-tab="product-management">
+                    <span class="nav-icon">📦</span>
+                    Product Management
+                </li>
+                <li class="nav-item" data-tab="category-management">
+                    <span class="nav-icon">🏷️</span>
+                    Category Management
+                </li>
+                <li class="nav-item" data-tab="unit-type-management">
+                    <span class="nav-icon">📏</span>
+                    Unit Type Management
+                </li>
+                <li class="nav-item" data-tab="manufacturing-unit-management">
+                    <span class="nav-icon">🏭</span>
+                    Manufacturing Unit Management
+                </li>
+                <li class="nav-item" data-tab="reports">
+                    <span class="nav-icon">📈</span>
+                    Reports
+                </li>
+            </ul>
+        </nav>
+
+        <main class="content">
+            <!-- Production Log Tab -->
+            <section id="production-log" class="tab-content">
+                <h2>Add Production Log</h2>
+                <form id="productionForm">
+                    <div class="form-group">
+                        <label for="productSearch">Search Product:</label>
+                        <div class="select-container">
+                            <div class="search-controls">
+                                <input type="text" id="productSearch" class="product-search"
+                                    placeholder="Type to search products...">
+                                <button type="button" class="icon-button clear-button" title="Clear search"
+                                    onclick="clearProductSearch()">✕</button>
+                            </div>
+                            <select id="productSelect" class="filtered-select" required>
+                                <option value="">Select a product</option>
+                            </select>
                         </div>
-                        <select id="productSelect" class="filtered-select" required>
-                            <option value="">Select a product</option>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Quantity:</label>
+                        <input type="number" id="quantity" required>
+                        <span id="unitTypeDisplay"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="manufacturingUnit">Manufacturing Unit:</label>
+                        <select id="manufacturingUnit" required>
+                            <option value="">Select Manufacturing Unit</option>
                         </select>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="quantity">Quantity:</label>
-                    <input type="number" id="quantity" required>
-                    <span id="unitTypeDisplay"></span>
-                </div>
-                <button type="submit">Add Production Log</button>
-            </form>
-        </section>
+                    <div class="form-group">
+                        <label for="logType">Log Type:</label>
+                        <select id="logType" required>
+                            <option value="">Select Log Type</option>
+                        </select>
+                    </div>
+                    <button type="submit">Add Production Log</button>
+                </form>
+            </section>
 
-        <section id="addLogSection">
-            <h2>Add Production Log</h2>
-            <!-- Previous production log form remains unchanged -->
+            <!-- View Logs Tab -->
+            <section id="view-logs" class="tab-content">
+                <h2>View Production Logs</h2>
+                <div class="date-filter">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" id="startDate">
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate">
+                    <button id="filterButton">Filter</button>
+                </div>
+                <table id="productionTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Created At</th>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Unit Type</th>
+                            <th>Category</th>
+                            <th>Manufacturing Unit</th>
+                            <th>Log Type</th>
+                            <th>Updation Reason</th>
+                            <th>Updated At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productionData"></tbody>
+                </table>
+            </section>
 
-            <div class="product-management">
+            <!-- Product Management Tab -->
+            <section id="product-management" class="tab-content">
                 <h2>Product Management</h2>
                 <form id="productForm" class="product-form">
                     <div class="form-group">
@@ -62,11 +137,15 @@
                     </div>
                     <div class="form-group">
                         <label for="productCategory">Category:</label>
-                        <input type="text" id="productCategory" required>
+                        <select id="productCategory" required>
+                            <option value="">Select Category</option>
+                        </select>
                     </div>
                     <div class="form-group">
                         <label for="productUnitType">Unit Type:</label>
-                        <input type="text" id="productUnitType" required>
+                        <select id="productUnitType" required>
+                            <option value="">Select Unit Type</option>
+                        </select>
                     </div>
                     <button type="submit">Add Product</button>
                 </form>
@@ -82,44 +161,89 @@
                     </thead>
                     <tbody id="productTableBody"></tbody>
                 </table>
-            </div>
-        </section>
+            </section>
 
-        <section id="viewLogsSection">
-            <h2>View Production Logs</h2>
-            <div class="date-filter">
-                <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate">
-                <label for="endDate">End Date:</label>
-                <input type="date" id="endDate">
-                <button id="filterButton">Filter</button>
-                <button id="exportButton" onclick="exportProductionLogs()">Export Logs</button>
-
-                <div class="export-controls">
-                    <label for="summaryDate">Select Date:</label>
-                    <input type="date" id="summaryDate">
-                    <button onclick="exportCategorySummary()">Export Category Summary</button>
-                    <button onclick="exportDetailedCategorySummary()">Export Detailed Summary</button>
+            <!-- Category Management Tab -->
+            <section id="category-management" class="tab-content">
+                <h2>Category Management</h2>
+                <form id="categoryForm" class="management-form">
+                    <div class="form-group">
+                        <label for="newCategory">New Category Name:</label>
+                        <input type="text" id="newCategory" required placeholder="Enter new category name">
+                    </div>
+                    <button type="submit">Add Category</button>
+                </form>
+                <div class="list-container">
+                    <h3>Existing Categories</h3>
+                    <ul id="categoryList" class="management-list"></ul>
                 </div>
-            </div>
-            <table id="productionTable">
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Created At</th>
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>Unit Type</th>
-                        <th>Category</th>
-                        <th>Updation Reason</th>
-                        <th>Updated At</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="productionData"></tbody>
-            </table>
-        </section>
-    </main>
+            </section>
+
+            <!-- Unit Type Management Tab -->
+            <section id="unit-type-management" class="tab-content">
+                <h2>Unit Type Management</h2>
+                <form id="unitTypeForm" class="management-form">
+                    <div class="form-group">
+                        <label for="newUnitType">New Unit Type:</label>
+                        <input type="text" id="newUnitType" required placeholder="Enter new unit type">
+                    </div>
+                    <button type="submit">Add Unit Type</button>
+                </form>
+                <div class="list-container">
+                    <h3>Existing Unit Types</h3>
+                    <ul id="unitTypeList" class="management-list"></ul>
+                </div>
+            </section>
+
+            <!-- Manufacturing Unit Management Tab -->
+            <section id="manufacturing-unit-management" class="tab-content">
+                <h2>Manufacturing Unit Management</h2>
+                <form id="manufacturingUnitForm" class="management-form">
+                    <div class="form-group">
+                        <label for="newManufacturingUnitName">Name:</label>
+                        <input type="text" id="newManufacturingUnitName" required placeholder="Enter manufacturing unit name">
+                    </div>
+                    <button type="submit">Add Manufacturing Unit</button>
+                </form>
+                <div class="list-container">
+                    <h3>Existing Manufacturing Units</h3>
+                    <ul id="manufacturingUnitList" class="management-list"></ul>
+                </div>
+            </section>
+
+            <!-- Reports Tab -->
+            <section id="reports" class="tab-content">
+                <div class="reports-container">
+                    <h2>Export Reports</h2>
+                    
+                    <div class="date-range-section">
+                        <h3>Production Logs Export</h3>
+                        <div class="form-group">
+                            <label for="startDate">Start Date:</label>
+                            <input type="date" id="startDate" required>
+                            <label for="endDate">End Date:</label>
+                            <input type="date" id="endDate" required>
+                            <button onclick="exportProductionLogs()">Export Production Logs</button>
+                        </div>
+                    </div>
+
+                    <div class="daily-summary-section">
+                        <h3>Daily Summary Reports</h3>
+                        <div class="form-group">
+                            <label for="summaryDate">Select Date:</label>
+                            <input type="date" id="summaryDate" required>
+                            <div class="export-buttons">
+                                <button onclick="exportCategorySummary()">Export Category Summary</button>
+                                <button onclick="exportDetailedCategorySummary()">Export Detailed Category Summary</button>
+                                <button onclick="exportManufacturingUnitSummary()">Export Manufacturing Unit Summary</button>
+                                <button onclick="exportDetailedManufacturingUnitSummary()">Export Detailed Manufacturing Unit Summary</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
 
     <div id="editDialog" class="modal" style="display: none;">
         <div class="modal-content">
@@ -128,6 +252,18 @@
                 <div class="form-group">
                     <label for="editQuantity">Quantity:</label>
                     <input type="number" id="editQuantity" required>
+                </div>
+                <div class="form-group">
+                    <label for="editManufacturingUnit">Manufacturing Unit:</label>
+                    <select id="editManufacturingUnit" required>
+                        <option value="">Select Manufacturing Unit</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editLogType">Log Type:</label>
+                    <select id="editLogType" required>
+                        <option value="">Select Log Type</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="editReason">Updation Reason:</label>
@@ -139,7 +275,7 @@
         </div>
     </div>
 
-    <div id="editProductDialog" class="modal">
+    <div id="editProductDialog" class="modal" style="display: none;">
         <div class="modal-content">
             <h3>Edit Product</h3>
             <form id="editProductForm">
@@ -149,11 +285,15 @@
                 </div>
                 <div class="form-group">
                     <label for="editProductCategory">Category:</label>
-                    <input type="text" id="editProductCategory" required>
+                    <select id="editProductCategory" required>
+                        <option value="">Select Category</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label for="editProductUnitType">Unit Type:</label>
-                    <input type="text" id="editProductUnitType" required>
+                    <select id="editProductUnitType" required>
+                        <option value="">Select Unit Type</option>
+                    </select>
                 </div>
                 <button type="submit">Update</button>
                 <button type="button" onclick="closeEditProductDialog()">Cancel</button>
@@ -161,7 +301,7 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script type="module" src="script.js"></script>
 </body>
 
 </html>

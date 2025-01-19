@@ -1,4 +1,6 @@
 node_modules
+out
+exports
 .DS_Store
 dist
 .env

@@ -44,52 +44,88 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    padding: 1rem;
+    padding: 1rem 2rem;
     background-color: var(--header-bg);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 1000;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .app-title {
-    font-size: 1.2rem;
-    font-weight: bold;
+    font-size: 1.4rem;
+    font-weight: 600;
     color: var(--text-color);
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
+    letter-spacing: 0.5px;
 }
 
 .app-logo {
-    height: 32px;
+    height: 36px;
     width: auto;
+}
+
+.header-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.icon-button {
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+    background: var(--table-header-bg);
+    color: var(--table-header-text);
+    border-color: var(--table-header-bg);
+}
+
+.theme-toggle {
+    background: var(--bg-color);
+}
+
+.theme-toggle:hover {
+    background: var(--table-header-bg);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+    background: var(--table-header-bg);
+}
+
+.refresh-button {
+    font-weight: bold;
 }
 
 /* Content layout */
 .content-container {
-    padding-top: 70px;
-    display: flex;
-    height: calc(100vh - 70px);
-    gap: 20px;
-    padding: 70px 20px 20px 20px;
+    padding: 0;
+    height: auto;
 }
 
 /* Section styles */
 #addLogSection,
 #viewLogsSection {
-    flex: 1;
-    background: var(--section-bg);
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    height: 100%;
-    overflow-y: auto;
-}
-
-#viewLogsSection {
-    flex: 2;
+    height: auto;
+    flex: none;
 }
 
 /* Form styles */
@@ -353,4 +389,217 @@ button:hover {
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.main-container {
+    display: flex;
+    height: calc(100vh - 70px);
+    margin-top: 70px;
+}
+
+.sidebar {
+    width: 250px;
+    background-color: var(--header-bg);
+    border-right: 1px solid var(--border-color);
+    padding: 20px 0;
+    flex-shrink: 0;
+}
+
+.nav-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-item {
+    padding: 15px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    color: var(--text-color);
+    transition: background-color 0.3s;
+}
+
+.nav-item:hover {
+    background-color: var(--table-row-hover);
+}
+
+.nav-item.active {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+}
+
+.nav-icon {
+    margin-right: 10px;
+    font-size: 1.2em;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.tab-content {
+    display: none;
+    background-color: var(--section-bg);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.export-group {
+    background-color: var(--section-bg);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.export-group h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+/* Add these to your existing styles */
+select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+select:focus {
+    outline: none;
+    border-color: var(--table-header-bg);
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+[data-theme="dark"] select {
+    background-color: #363636;
+    color: #ffffff;
+    border-color: #505050;
+}
+
+[data-theme="dark"] select:focus {
+    border-color: #6a6a6a;
+}
+
+select option {
+    padding: 8px;
+}
+
+/* Management form styles */
+.management-form {
+    max-width: 500px;
+    margin-bottom: 30px;
+}
+
+.management-form button {
+    margin-top: 10px;
+    width: 100%;
+}
+
+.list-container {
+    background-color: var(--bg-color);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+.list-container h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: var(--text-color);
+    font-size: 1.1rem;
+}
+
+.management-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.management-list li {
+    padding: 12px 16px;
+    background-color: var(--section-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.95rem;
+}
+
+.management-list li:last-child {
+    margin-bottom: 0;
+}
+
+/* Reports Styles */
+.reports-container {
+    padding: 20px;
+}
+
+.reports-container h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.reports-container h3 {
+    margin: 15px 0;
+    color: #444;
+}
+
+.date-range-section,
+.daily-summary-section {
+    background: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.reports-container .form-group {
+    margin: 15px 0;
+}
+
+.reports-container .form-group label {
+    display: inline-block;
+    margin-right: 10px;
+    font-weight: 500;
+}
+
+.reports-container .form-group input[type="date"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-right: 15px;
+}
+
+.export-buttons {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.reports-container button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.reports-container button:hover {
+    background-color: #45a049;
 }
