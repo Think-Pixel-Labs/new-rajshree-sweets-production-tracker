@@ -603,3 +603,41 @@ select option {
 .reports-container button:hover {
     background-color: #45a049;
 }
+
+/* Reports section dark mode styles */
+[data-theme="dark"] .reports-container {
+    background-color: var(--section-bg);
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .reports-container h2,
+[data-theme="dark"] .reports-container h3 {
+    color: var(--text-color);
+}
+
+[data-theme="dark"] .date-range-section,
+[data-theme="dark"] .daily-summary-section {
+    background-color: var(--section-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .reports-container .form-group input[type="date"] {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .reports-container button {
+    background-color: var(--table-header-bg);
+    color: var(--table-header-text);
+    border: 1px solid var(--border-color);
+}
+
+[data-theme="dark"] .reports-container button:hover {
+    background-color: var(--hover-color);
+}
+
+[data-theme="dark"] .export-buttons {
+    background-color: var(--section-bg);
+    border-color: var(--border-color);
+}
