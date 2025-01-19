@@ -136,17 +136,20 @@ function updateProductTable(products) {
 export async function handleProductFormSubmit(event) {
     event.preventDefault();
     const name = document.getElementById('productName').value;
-    const category = document.getElementById('productCategory').value;
-    const unitType = document.getElementById('productUnitType').value;
+    const categoryId = document.getElementById('productCategory').value;
+    const unitId = document.getElementById('productUnitType').value;
 
     try {
         const response = await fetch('/api/products', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, category, unitType })
+            body: JSON.stringify({ name, categoryId, unitId })
         });
 
-        if (!response.ok) throw new Error('Failed to add product');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to add product');
+        }
 
         event.target.reset();
         await loadProductTable();
@@ -154,35 +157,29 @@ export async function handleProductFormSubmit(event) {
         await window.refreshProducts();
     } catch (error) {
         console.error('Error adding product:', error);
-        alert('Failed to add product');
+        alert('Failed to add product: ' + error.message);
     }
 }
 
 export async function editProduct(product) {
     const dialog = document.getElementById('editProductDialog');
     
-    // Log the product being edited
-    console.log('Editing product:', product);
-
     document.getElementById('editProductName').value = product.name;
     
     // Update category select with current value
     const editCategoryContainer = document.getElementById('editProductCategory').parentElement;
-    const editCategorySelect = createCategorySelect(product.category);
+    const editCategorySelect = createCategorySelect(product.categoryId);
     editCategorySelect.id = 'editProductCategory';
     editCategoryContainer.replaceChild(editCategorySelect, document.getElementById('editProductCategory'));
     
     // Update unit type select with current value
     const editUnitTypeContainer = document.getElementById('editProductUnitType').parentElement;
-    const editUnitSelect = createUnitTypeSelect(product.unitType);
+    const editUnitSelect = createUnitTypeSelect(product.unitId);
     editUnitSelect.id = 'editProductUnitType';
     editUnitTypeContainer.replaceChild(editUnitSelect, document.getElementById('editProductUnitType'));
     
     dialog.style.display = 'block';
-    dialog.dataset.productId = product.id; // Make sure this is being set correctly
-    
-    // Log the dialog dataset after setting
-    console.log('Dialog dataset after setting:', dialog.dataset);
+    dialog.dataset.productId = product.id;
 }
 
 export function closeEditProductDialog() {
@@ -194,23 +191,14 @@ export async function handleEditProductSubmit(event) {
     const dialog = document.getElementById('editProductDialog');
     const productId = dialog.dataset.productId;
     const name = document.getElementById('editProductName').value;
-    const category = document.getElementById('editProductCategory').value;
-    const unitType = document.getElementById('editProductUnitType').value;
+    const categoryId = document.getElementById('editProductCategory').value;
+    const unitId = document.getElementById('editProductUnitType').value;
 
     try {
-        // Log the request details for debugging
-        console.log('Updating product:', {
-            id: productId,
-            name,
-            category,
-            unitType,
-            url: `/api/products/${productId}`
-        });
-
         const response = await fetch(`/api/products/${productId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, category, unitType })
+            body: JSON.stringify({ name, categoryId, unitId })
         });
 
         if (!response.ok) {

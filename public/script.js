@@ -151,25 +151,29 @@ async function loadCategories() {
 async function handleCategorySubmit(event) {
     event.preventDefault();
     const categoryInput = document.getElementById('newCategory');
-    const category = categoryInput.value.trim();
+    const name = categoryInput.value.trim();
     
-    if (!category) return;
+    if (!name) return;
 
     try {
         const response = await fetch('/api/categories', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ category })
+            body: JSON.stringify({ name })
         });
 
         if (response.ok) {
             categoryInput.value = '';
             await loadCategories();
+            // Refresh product management dropdowns
+            await initializeSelects();
         } else {
-            console.error('Failed to add category');
+            const errorData = await response.json();
+            alert(errorData.error || 'Failed to add category');
         }
     } catch (error) {
         console.error('Error adding category:', error);
+        alert('Error adding category: ' + error.message);
     }
 }
 
@@ -194,25 +198,29 @@ async function loadUnitTypes() {
 async function handleUnitTypeSubmit(event) {
     event.preventDefault();
     const unitTypeInput = document.getElementById('newUnitType');
-    const unitType = unitTypeInput.value.trim();
+    const name = unitTypeInput.value.trim();
     
-    if (!unitType) return;
+    if (!name) return;
 
     try {
         const response = await fetch('/api/unit-types', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ unitType })
+            body: JSON.stringify({ name })
         });
 
         if (response.ok) {
             unitTypeInput.value = '';
             await loadUnitTypes();
+            // Refresh product management dropdowns
+            await initializeSelects();
         } else {
-            console.error('Failed to add unit type');
+            const errorData = await response.json();
+            alert(errorData.error || 'Failed to add unit type');
         }
     } catch (error) {
         console.error('Error adding unit type:', error);
+        alert('Error adding unit type: ' + error.message);
     }
 }
 
