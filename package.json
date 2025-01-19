@@ -32,14 +32,11 @@
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.2.0",
-    "@electron-forge/maker-deb": "^7.6.0",
     "@electron-forge/maker-squirrel": "^7.2.0",
     "@electron-forge/maker-zip": "^7.2.0",
     "@electron-forge/plugin-auto-unpack-natives": "^7.6.0",
     "@electron-forge/publisher-github": "^7.6.0",
-    "electron": "^32.0.1",
-    "nodemon": "^3.1.4",
-    "svg2img": "^1.0.0-beta.2"
+    "electron": "^32.0.1"
   },
   "config": {
     "forge": {
@@ -64,7 +61,7 @@
         {
           "name": "@electron-forge/maker-zip",
           "platforms": [
-            "darwin"
+            "win32"
           ]
         }
       ],
