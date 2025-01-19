@@ -103,7 +103,6 @@ function createWindow() {
 
 app.on('ready', () => {
     createWindow();
-    // mainWindow.webContents.openDevTools();
     globalShortcut.register('F11', () => {
         mainWindow.setFullScreen(!mainWindow.isFullScreen());
     });
