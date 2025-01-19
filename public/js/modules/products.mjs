@@ -88,7 +88,11 @@ export async function handleProductSubmit(event) {
 
         // Clear form
         event.target.reset();
-        document.getElementById('productSearch').value = '';
+        // Clear product search
+        const searchInput = document.getElementById('productSearch');
+        searchInput.value = '';
+        // Reset and repopulate the dropdown with all products
+        updateProductSelect();
         document.getElementById('unitTypeDisplay').textContent = '';
 
         // Refresh production logs
