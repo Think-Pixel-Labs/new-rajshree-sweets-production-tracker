@@ -25,13 +25,17 @@ export function handleFilterClick() {
     });
 }
 
-export function editLog(id, currentQuantity) {
+export function editLog(id, currentQuantity, currentManufacturingUnit, currentLogType) {
     currentEditId = id;
     const editDialog = document.getElementById('editDialog');
     const editQuantity = document.getElementById('editQuantity');
+    const editManufacturingUnit = document.getElementById('editManufacturingUnit');
+    const editLogType = document.getElementById('editLogType');
     const editReason = document.getElementById('editReason');
 
     editQuantity.value = currentQuantity;
+    editManufacturingUnit.value = currentManufacturingUnit;
+    editLogType.value = currentLogType;
     editReason.value = '';
     editDialog.style.display = 'block';
 }
@@ -43,13 +47,20 @@ export function closeEditDialog() {
 export async function handleEditSubmit(event) {
     event.preventDefault();
     const quantity = document.getElementById('editQuantity').value;
+    const manufacturingUnitId = document.getElementById('editManufacturingUnit').value;
+    const logTypeId = document.getElementById('editLogType').value;
     const reason = document.getElementById('editReason').value;
 
     try {
         const response = await fetch(`/api/production/${currentEditId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ quantity, updationReason: reason })
+            body: JSON.stringify({ 
+                quantity, 
+                manufacturingUnitId, 
+                logTypeId, 
+                updationReason: reason 
+            })
         });
 
         if (!response.ok) throw new Error('Failed to update log');
@@ -90,10 +101,12 @@ function updateProductionTable(data) {
         row.insertCell(1).textContent = formatDateTimeIndian(item.createdAt);
         row.insertCell(2).textContent = item.productName;
         row.insertCell(3).textContent = item.quantity;
-        row.insertCell(4).textContent = item.unitType;
+        row.insertCell(4).textContent = item.unit;
         row.insertCell(5).textContent = item.category;
-        row.insertCell(6).textContent = item.updationReason || '-';
-        row.insertCell(7).textContent = item.updatedAt ? formatDateTimeIndian(item.updatedAt) : '-';
+        row.insertCell(6).textContent = item.manufacturingUnit || '-';
+        row.insertCell(7).textContent = item.logType || '-';
+        row.insertCell(8).textContent = item.updationReason || '-';
+        row.insertCell(9).textContent = item.updatedAt ? formatDateTimeIndian(item.updatedAt) : '-';
         
         const actionsCell = createActionsCell(item);
         row.appendChild(actionsCell);
@@ -107,7 +120,7 @@ function createActionsCell(item) {
     const editButton = document.createElement('button');
     editButton.textContent = 'Edit';
     editButton.className = 'action-button edit-button';
-    editButton.onclick = () => editLog(item.id, item.quantity);
+    editButton.onclick = () => editLog(item.id, item.quantity, item.manufacturingUnit, item.logType);
     actionsCell.appendChild(editButton);
 
     const deleteButton = document.createElement('button');

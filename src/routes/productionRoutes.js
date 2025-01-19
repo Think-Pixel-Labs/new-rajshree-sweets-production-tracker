@@ -36,20 +36,22 @@ module.exports = function(db, mainWindow) {
 
     // Create production log
     router.post('/', handleErrors(async (req, res) => {
-        const { productId, quantity } = req.body;
+        const { productId, quantity, manufacturingUnitId, logTypeId } = req.body;
 
-        if (!productId || !quantity) {
-            return res.status(400).json({ error: 'Product ID and quantity are required' });
+        if (!productId || !quantity || !manufacturingUnitId || !logTypeId) {
+            return res.status(400).json({ error: 'Product ID, quantity, manufacturing unit, and log type are required' });
         }
 
         db.run(
             `INSERT INTO productionLogs (
                 productId,
                 quantity,
+                manufacuringUnit,
+                logType,
                 createdAt,
                 updatedAt
-            ) VALUES (?, ?, ${db.getCurrentISTDateTime()}, ${db.getCurrentISTDateTime()})`,
-            [productId, quantity],
+            ) VALUES (?, ?, ?, ?, ${db.getCurrentISTDateTime()}, ${db.getCurrentISTDateTime()})`,
+            [productId, quantity, manufacturingUnitId, logTypeId],
             function (err) {
                 if (err) return res.status(500).json({ error: err.message });
                 res.json({ id: this.lastID });
@@ -70,11 +72,15 @@ module.exports = function(db, mainWindow) {
                 p.id as productId,
                 p.name as productName,
                 pc.name as category,
-                ut.name as unit
+                ut.name as unit,
+                mu.name as manufacturingUnit,
+                lt.type as logType
             FROM productionLogs pl
             JOIN products p ON pl.productId = p.id
             LEFT JOIN productCategories pc ON p.category = pc.id
             LEFT JOIN unitTypes ut ON p.unit = ut.id
+            LEFT JOIN manufacturingUnits mu ON pl.manufacuringUnit = mu.id
+            LEFT JOIN productionLogTypes lt ON pl.logType = lt.id
         `;
         let params = [];
 
@@ -97,19 +103,21 @@ module.exports = function(db, mainWindow) {
     // Update production log
     router.put('/:id', handleErrors(async (req, res) => {
         const { id } = req.params;
-        const { quantity, updationReason } = req.body;
+        const { quantity, manufacturingUnitId, logTypeId, updationReason } = req.body;
 
-        if (!quantity) {
-            return res.status(400).json({ error: 'Quantity is required' });
+        if (!quantity || !manufacturingUnitId || !logTypeId) {
+            return res.status(400).json({ error: 'Quantity, manufacturing unit, and log type are required' });
         }
 
         db.run(
             `UPDATE productionLogs 
              SET quantity = ?, 
+                 manufacuringUnit = ?,
+                 logType = ?,
                  updationReason = ?, 
                  updatedAt = ${db.getCurrentISTDateTime()}
              WHERE id = ?`,
-            [quantity, updationReason, id],
+            [quantity, manufacturingUnitId, logTypeId, updationReason, id],
             function (err) {
                 if (err) return res.status(500).json({ error: err.message });
                 res.json({ success: true });

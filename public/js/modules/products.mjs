@@ -61,9 +61,11 @@ export async function handleProductSubmit(event) {
     event.preventDefault();
     const productId = document.getElementById('productSelect').value;
     const quantity = document.getElementById('quantity').value;
+    const manufacturingUnitId = document.getElementById('manufacturingUnit').value;
+    const logTypeId = document.getElementById('logType').value;
 
-    if (!productId || !quantity) {
-        alert('Please select a product and enter quantity');
+    if (!productId || !quantity || !manufacturingUnitId || !logTypeId) {
+        alert('Please fill in all required fields');
         return;
     }
 
@@ -71,18 +73,29 @@ export async function handleProductSubmit(event) {
         const response = await fetch('/api/production', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ productId, quantity })
+            body: JSON.stringify({ 
+                productId, 
+                quantity,
+                manufacturingUnitId,
+                logTypeId
+            })
         });
 
-        if (!response.ok) throw new Error('Failed to add production log');
-        
-        // Reset form and refresh data
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to add production log');
+        }
+
+        // Clear form
         event.target.reset();
+        document.getElementById('productSearch').value = '';
         document.getElementById('unitTypeDisplay').textContent = '';
-        await fetchProductionData();
+
+        // Refresh production logs
+        await window.fetchProductionData();
     } catch (error) {
         console.error('Error adding production log:', error);
-        alert('Failed to add production log');
+        alert(error.message);
     }
 }
 

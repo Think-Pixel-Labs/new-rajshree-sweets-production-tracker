@@ -30,6 +30,8 @@ import {
     deleteProduct,
     initializeSelects 
 } from './js/modules/productManagement.mjs';
+import { fetchLogTypes } from './js/modules/logTypes.mjs';
+import { fetchManufacturingUnits } from './js/modules/manufacturingUnits.mjs';
 
 // Make functions globally available
 window.clearProductSearch = clearProductSearch;
@@ -233,7 +235,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         await Promise.all([
             fetchProducts(),
             fetchProductionData(),
-            loadProductTable()
+            loadProductTable(),
+            fetchLogTypes(),
+            fetchManufacturingUnits()
         ]);
 
         const savedTheme = localStorage.getItem('theme') || 'light';
