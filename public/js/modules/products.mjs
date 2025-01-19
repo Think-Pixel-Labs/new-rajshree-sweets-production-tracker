@@ -92,7 +92,11 @@ export async function handleProductSubmit(event) {
         document.getElementById('unitTypeDisplay').textContent = '';
 
         // Refresh production logs
-        await window.fetchProductionData();
+        if (typeof window.fetchProductionData === 'function') {
+            await window.fetchProductionData();
+        } else {
+            console.error('fetchProductionData is not available on window object');
+        }
     } catch (error) {
         console.error('Error adding production log:', error);
         alert(error.message);

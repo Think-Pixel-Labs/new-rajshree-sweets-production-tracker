@@ -45,6 +45,7 @@ window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 window.closeEditProductDialog = closeEditProductDialog;
 window.refreshProducts = fetchProducts;
+window.fetchProductionData = fetchProductionData;
 
 function setDefaultDates() {
     const today = new Date().toISOString().split('T')[0];
