@@ -25,7 +25,7 @@ function updateProductSelect() {
     products.forEach(product => {
         const option = document.createElement('option');
         option.value = product.id;
-        option.textContent = `${product.name} (${product.category})`;
+        option.textContent = `[${product.id}] ${product.name} (${product.category})`;
         productSelect.appendChild(option);
     });
 }
@@ -42,7 +42,7 @@ export function filterProducts(searchText) {
     filteredProducts.forEach(product => {
         const option = document.createElement('option');
         option.value = product.id;
-        option.textContent = `${product.name} (${product.category})`;
+        option.textContent = `[${product.id}] ${product.name} (${product.category})`;
         productSelect.appendChild(option);
     });
 }

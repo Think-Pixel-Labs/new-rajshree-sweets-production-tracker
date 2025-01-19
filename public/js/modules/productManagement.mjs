@@ -49,7 +49,7 @@ function createCategorySelect(currentValue = '') {
     categories.forEach(category => {
         const option = document.createElement('option');
         option.value = category.id;
-        option.textContent = category.name;
+        option.textContent = `[${category.id}] ${category.name}`;
         if (category.id === currentValue) {
             option.selected = true;
         }
@@ -71,7 +71,7 @@ function createUnitTypeSelect(currentValue = '') {
     unitTypes.forEach(unit => {
         const option = document.createElement('option');
         option.value = unit.id;
-        option.textContent = unit.name;
+        option.textContent = `[${unit.id}] ${unit.name}`;
         if (unit.id === currentValue) {
             option.selected = true;
         }
@@ -93,7 +93,7 @@ function createManufacturingUnitSelect(currentValue = '') {
     manufacturingUnits.forEach(unit => {
         const option = document.createElement('option');
         option.value = unit.id;
-        option.textContent = unit.name;
+        option.textContent = `[${unit.id}] ${unit.name}`;
         if (unit.id === currentValue) {
             option.selected = true;
         }
@@ -180,12 +180,13 @@ function updateProductTable(products) {
         console.log('Processing product:', product); // Debug log
 
         const row = tbody.insertRow();
-        row.insertCell(0).textContent = product.name || '';
-        row.insertCell(1).textContent = product.category || '';
-        row.insertCell(2).textContent = product.unit || '';
-        row.insertCell(3).textContent = product.manufacturing_unit_name || '';
+        row.insertCell(0).textContent = product.id || '';
+        row.insertCell(1).textContent = product.name || '';
+        row.insertCell(2).textContent = `[${product.category_id}] ${product.category || ''}`;
+        row.insertCell(3).textContent = `[${product.unit_id}] ${product.unit || ''}`;
+        row.insertCell(4).textContent = `[${product.manufacturing_unit_id}] ${product.manufacturing_unit_name || ''}`;
 
-        const actionsCell = row.insertCell(4);
+        const actionsCell = row.insertCell(5);
         actionsCell.className = 'actions-cell';
 
         // Store the product ID in the row's data attribute
