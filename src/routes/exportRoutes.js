@@ -89,7 +89,7 @@ module.exports = function(db, mainWindow) {
                     SUM(pl.quantity) as totalQuantity,
                     ut.name as unitType,
                     COUNT(DISTINCT p.id) as uniqueProducts,
-                    COUNT(pl.id) as totalEntries
+                    COUNT(*) as totalEntries
                 FROM productionLogs pl
                 JOIN products p ON pl.productId = p.id
                 LEFT JOIN productCategories pc ON p.category = pc.id
@@ -147,7 +147,7 @@ module.exports = function(db, mainWindow) {
                     lt.type as logType,
                     SUM(pl.quantity) as totalQuantity,
                     ut.name as unitType,
-                    COUNT(pl.id) as entries
+                    COUNT(*) as entries
                 FROM productionLogs pl
                 JOIN products p ON pl.productId = p.id
                 LEFT JOIN productCategories pc ON p.category = pc.id
@@ -211,7 +211,7 @@ module.exports = function(db, mainWindow) {
                     COUNT(DISTINCT p.id) as uniqueProducts,
                     SUM(pl.quantity) as totalQuantity,
                     ut.name as unitType,
-                    COUNT(pl.id) as totalEntries
+                    COUNT(*) as totalEntries
                 FROM productionLogs pl
                 JOIN products p ON pl.productId = p.id
                 LEFT JOIN manufacturingUnits mu ON pl.manufacuringUnit = mu.id
@@ -276,7 +276,7 @@ module.exports = function(db, mainWindow) {
                     p.name as productName,
                     SUM(pl.quantity) as totalQuantity,
                     ut.name as unitType,
-                    COUNT(pl.id) as entries
+                    COUNT(*) as entries
                 FROM productionLogs pl
                 JOIN products p ON pl.productId = p.id
                 LEFT JOIN manufacturingUnits mu ON pl.manufacuringUnit = mu.id
