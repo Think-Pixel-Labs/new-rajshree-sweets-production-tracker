@@ -33,6 +33,7 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-dmg',
+      platforms: ['darwin'],
       config: {
         background: './public/assets/dmg-background.png',
         format: 'ULFO'
