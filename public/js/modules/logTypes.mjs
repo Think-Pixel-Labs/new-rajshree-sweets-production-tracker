@@ -22,7 +22,9 @@ function updateLogTypeSelects() {
             const option = document.createElement('option');
             option.value = logType.id;
             option.textContent = logType.type;
-            if (logType.id === currentValue) {
+            if (logType.type === 'PRODUCTION' && !currentValue) {
+                option.selected = true;
+            } else if (logType.id === currentValue) {
                 option.selected = true;
             }
             addSelect.appendChild(option);
@@ -38,7 +40,9 @@ function updateLogTypeSelects() {
             const option = document.createElement('option');
             option.value = logType.id;
             option.textContent = logType.type;
-            if (logType.id === currentValue) {
+            if (logType.type === 'PRODUCTION' && !currentValue) {
+                option.selected = true;
+            } else if (logType.id === currentValue) {
                 option.selected = true;
             }
             editSelect.appendChild(option);

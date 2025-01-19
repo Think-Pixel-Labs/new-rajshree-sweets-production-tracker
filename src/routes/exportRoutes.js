@@ -31,7 +31,7 @@ module.exports = function(db, mainWindow) {
                 JOIN products p ON pl.productId = p.id
                 LEFT JOIN productCategories pc ON p.category = pc.id
                 LEFT JOIN unitTypes ut ON p.unit = ut.id
-                LEFT JOIN manufacturingUnits mu ON pl.manufacuringUnit = mu.id
+                LEFT JOIN manufacturingUnits mu ON p.manufacturingUnit = mu.id
                 LEFT JOIN productionLogTypes lt ON pl.logType = lt.id
                 WHERE DATE(pl.createdAt) BETWEEN DATE(?) AND DATE(?)
                 ORDER BY pl.createdAt DESC
@@ -214,7 +214,7 @@ module.exports = function(db, mainWindow) {
                     COUNT(*) as totalEntries
                 FROM productionLogs pl
                 JOIN products p ON pl.productId = p.id
-                LEFT JOIN manufacturingUnits mu ON pl.manufacuringUnit = mu.id
+                LEFT JOIN manufacturingUnits mu ON p.manufacturingUnit = mu.id
                 LEFT JOIN productionLogTypes lt ON pl.logType = lt.id
                 LEFT JOIN productCategories pc ON p.category = pc.id
                 LEFT JOIN unitTypes ut ON p.unit = ut.id
@@ -279,7 +279,7 @@ module.exports = function(db, mainWindow) {
                     COUNT(*) as entries
                 FROM productionLogs pl
                 JOIN products p ON pl.productId = p.id
-                LEFT JOIN manufacturingUnits mu ON pl.manufacuringUnit = mu.id
+                LEFT JOIN manufacturingUnits mu ON p.manufacturingUnit = mu.id
                 LEFT JOIN productionLogTypes lt ON pl.logType = lt.id
                 LEFT JOIN productCategories pc ON p.category = pc.id
                 LEFT JOIN unitTypes ut ON p.unit = ut.id

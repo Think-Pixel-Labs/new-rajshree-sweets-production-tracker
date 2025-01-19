@@ -78,7 +78,7 @@
                     </div>
                     <div class="form-group">
                         <label for="quantity">Quantity:</label>
-                        <input type="number" id="quantity" required>
+                        <input type="number" id="quantity" step="0.01" min="0" required>
                         <span id="unitTypeDisplay"></span>
                     </div>
                     <div class="form-group">
@@ -277,7 +277,7 @@
             <form id="editForm">
                 <div class="form-group">
                     <label for="editQuantity">Quantity:</label>
-                    <input type="number" id="editQuantity" required>
+                    <input type="number" id="editQuantity" step="0.01" min="0" required>
                 </div>
                 <div class="form-group">
                     <label for="editLogType">Log Type:</label>
