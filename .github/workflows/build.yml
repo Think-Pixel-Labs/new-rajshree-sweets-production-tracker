@@ -54,16 +54,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Create assets directory
-        run: mkdir -p public/assets
-
-      - name: Create DMG background
-        run: |
-          echo '<svg width="540" height="380" xmlns="http://www.w3.org/2000/svg">
-            <rect width="100%" height="100%" fill="white"/>
-          </svg>' > background.svg
-          npx svg2img background.svg public/assets/dmg-background.png
-
       - name: Build app
         run: npm run make
 
