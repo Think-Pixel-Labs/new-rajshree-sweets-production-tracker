@@ -193,19 +193,32 @@
 
             <!-- Reports Tab -->
             <section id="reports" class="tab-content">
-                <h2>Reports</h2>
-                <div class="export-controls">
-                    <div class="export-group">
-                        <h3>Production Logs Export</h3>
-                        <button onclick="exportProductionLogs()">Export Logs</button>
-                    </div>
+                <div class="reports-container">
+                    <h2>Export Reports</h2>
                     
-                    <div class="export-group">
-                        <h3>Category Summary</h3>
-                        <label for="summaryDate">Select Date:</label>
-                        <input type="date" id="summaryDate">
-                        <button onclick="exportCategorySummary()">Export Category Summary</button>
-                        <button onclick="exportDetailedCategorySummary()">Export Detailed Summary</button>
+                    <div class="date-range-section">
+                        <h3>Production Logs Export</h3>
+                        <div class="form-group">
+                            <label for="startDate">Start Date:</label>
+                            <input type="date" id="startDate" required>
+                            <label for="endDate">End Date:</label>
+                            <input type="date" id="endDate" required>
+                            <button onclick="exportProductionLogs()">Export Production Logs</button>
+                        </div>
+                    </div>
+
+                    <div class="daily-summary-section">
+                        <h3>Daily Summary Reports</h3>
+                        <div class="form-group">
+                            <label for="summaryDate">Select Date:</label>
+                            <input type="date" id="summaryDate" required>
+                            <div class="export-buttons">
+                                <button onclick="exportCategorySummary()">Export Category Summary</button>
+                                <button onclick="exportDetailedCategorySummary()">Export Detailed Category Summary</button>
+                                <button onclick="exportManufacturingUnitSummary()">Export Manufacturing Unit Summary</button>
+                                <button onclick="exportDetailedManufacturingUnitSummary()">Export Detailed Manufacturing Unit Summary</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
