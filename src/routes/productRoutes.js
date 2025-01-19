@@ -10,10 +10,13 @@ module.exports = function(db) {
                 pc.name as category,
                 ut.name as unit,
                 p.category as category_id,
-                p.unit as unit_id
+                p.unit as unit_id,
+                p.manufacturingUnit as manufacturing_unit_id,
+                mu.name as manufacturing_unit_name
             FROM products p
             LEFT JOIN productCategories pc ON p.category = pc.id
             LEFT JOIN unitTypes ut ON p.unit = ut.id
+            LEFT JOIN manufacturingUnits mu ON p.manufacturingUnit = mu.id
             ORDER BY p.name ASC`;
 
         db.all(query, [], (err, rows) => {
@@ -24,15 +27,15 @@ module.exports = function(db) {
     });
 
     router.post('/', (req, res) => {
-        const { name, categoryId, unitId } = req.body;
+        const { name, categoryId, unitId, manufacturingUnitId } = req.body;
 
-        if (!name || !categoryId || !unitId) {
-            return res.status(400).json({ error: 'Name, category ID, and unit type ID are required' });
+        if (!name || !categoryId || !unitId || !manufacturingUnitId) {
+            return res.status(400).json({ error: 'Name, category ID, unit type ID, and manufacturing unit ID are required' });
         }
 
         db.run(
-            'INSERT INTO products (name, category, unit) VALUES (?, ?, ?)',
-            [name, categoryId, unitId],
+            'INSERT INTO products (name, category, unit, manufacturingUnit) VALUES (?, ?, ?, ?)',
+            [name, categoryId, unitId, manufacturingUnitId],
             function (err) {
                 if (err) return res.status(500).json({ error: err.message });
                 res.json({ id: this.lastID });
@@ -43,7 +46,7 @@ module.exports = function(db) {
     // Update product
     router.put('/:id', (req, res) => {
         const { id } = req.params;
-        const { name, categoryId, unitId } = req.body;
+        const { name, categoryId, unitId, manufacturingUnitId } = req.body;
 
         // Log the request details for debugging
         console.log('Update product request:', {
@@ -51,15 +54,16 @@ module.exports = function(db) {
             name,
             categoryId,
             unitId,
+            manufacturingUnitId,
             params: req.params,
             body: req.body
         });
 
         // Validate input
-        if (!id || !name || !categoryId || !unitId) {
+        if (!id || !name || !categoryId || !unitId || !manufacturingUnitId) {
             return res.status(400).json({ 
                 error: 'Missing required fields',
-                received: { id, name, categoryId, unitId }
+                received: { id, name, categoryId, unitId, manufacturingUnitId }
             });
         }
 
@@ -79,8 +83,8 @@ module.exports = function(db) {
 
             // Product exists, proceed with update
             db.run(
-                'UPDATE products SET name = ?, category = ?, unit = ? WHERE id = ?',
-                [name, categoryId, unitId, id],
+                'UPDATE products SET name = ?, category = ?, unit = ?, manufacturingUnit = ? WHERE id = ?',
+                [name, categoryId, unitId, manufacturingUnitId, id],
                 function (err) {
                     if (err) {
                         console.error('Error updating product:', err);

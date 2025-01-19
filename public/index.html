@@ -82,12 +82,6 @@
                         <span id="unitTypeDisplay"></span>
                     </div>
                     <div class="form-group">
-                        <label for="manufacturingUnit">Manufacturing Unit:</label>
-                        <select id="manufacturingUnit" required>
-                            <option value="">Select Manufacturing Unit</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
                         <label for="logType">Log Type:</label>
                         <select id="logType" required>
                             <option value="">Select Log Type</option>
@@ -147,6 +141,12 @@
                             <option value="">Select Unit Type</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label for="productManufacturingUnit">Manufacturing Unit:</label>
+                        <select id="productManufacturingUnit" required>
+                            <option value="">Select Manufacturing Unit</option>
+                        </select>
+                    </div>
                     <button type="submit">Add Product</button>
                 </form>
 
@@ -156,6 +156,7 @@
                             <th>Name</th>
                             <th>Category</th>
                             <th>Unit Type</th>
+                            <th>Manufacturing Unit</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -254,12 +255,6 @@
                     <input type="number" id="editQuantity" required>
                 </div>
                 <div class="form-group">
-                    <label for="editManufacturingUnit">Manufacturing Unit:</label>
-                    <select id="editManufacturingUnit" required>
-                        <option value="">Select Manufacturing Unit</option>
-                    </select>
-                </div>
-                <div class="form-group">
                     <label for="editLogType">Log Type:</label>
                     <select id="editLogType" required>
                         <option value="">Select Log Type</option>
@@ -293,6 +288,12 @@
                     <label for="editProductUnitType">Unit Type:</label>
                     <select id="editProductUnitType" required>
                         <option value="">Select Unit Type</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="editProductManufacturingUnit">Manufacturing Unit:</label>
+                    <select id="editProductManufacturingUnit" required>
+                        <option value="">Select Manufacturing Unit</option>
                     </select>
                 </div>
                 <button type="submit">Update</button>

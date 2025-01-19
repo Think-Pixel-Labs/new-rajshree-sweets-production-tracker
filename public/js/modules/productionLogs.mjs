@@ -25,11 +25,10 @@ export function handleFilterClick() {
     });
 }
 
-export function editLog(id, currentQuantity, currentManufacturingUnit, currentLogType) {
+export function editLog(id, currentQuantity, currentLogType) {
     console.log('editLog called with:', {
         id,
         currentQuantity,
-        currentManufacturingUnit,
         currentLogType
     });
     
@@ -37,22 +36,12 @@ export function editLog(id, currentQuantity, currentManufacturingUnit, currentLo
     editDialog.dataset.currentEditId = id;
     
     const editQuantity = document.getElementById('editQuantity');
-    const editManufacturingUnit = document.getElementById('editManufacturingUnit');
     const editLogType = document.getElementById('editLogType');
     const editReason = document.getElementById('editReason');
 
     // Set values
     editQuantity.value = currentQuantity;
     
-    // Pre-select manufacturing unit
-    if (editManufacturingUnit) {
-        Array.from(editManufacturingUnit.options).forEach(option => {
-            if (option.value === currentManufacturingUnit) {
-                option.selected = true;
-            }
-        });
-    }
-
     // Pre-select log type
     if (editLogType) {
         Array.from(editLogType.options).forEach(option => {
@@ -79,7 +68,6 @@ export async function handleEditSubmit(event) {
     console.log('handleEditSubmit called, currentEditId:', currentEditId);
     
     const quantity = document.getElementById('editQuantity').value;
-    const manufacturingUnitId = document.getElementById('editManufacturingUnit').value;
     const logTypeId = document.getElementById('editLogType').value;
     const reason = document.getElementById('editReason').value;
 
@@ -96,7 +84,6 @@ export async function handleEditSubmit(event) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 quantity, 
-                manufacturingUnitId, 
                 logTypeId, 
                 updationReason: reason 
             })
@@ -149,8 +136,7 @@ function createActionsCell(item) {
         console.log('Edit button clicked for item:', item);
         editLog(
             item.id, 
-            item.quantity, 
-            item.manufacuringUnit || '',
+            item.quantity,
             item.logType || ''
         );
     };
@@ -194,7 +180,6 @@ function updateProductionTable(data) {
             editLog(
                 item.productionId || item.id,
                 item.quantity,
-                item.manufacturingUnitId,
                 item.logTypeId
             );
         };

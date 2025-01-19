@@ -61,10 +61,9 @@ export async function handleProductSubmit(event) {
     event.preventDefault();
     const productId = document.getElementById('productSelect').value;
     const quantity = document.getElementById('quantity').value;
-    const manufacturingUnitId = document.getElementById('manufacturingUnit').value;
     const logTypeId = document.getElementById('logType').value;
 
-    if (!productId || !quantity || !manufacturingUnitId || !logTypeId) {
+    if (!productId || !quantity || !logTypeId) {
         alert('Please fill in all required fields');
         return;
     }
@@ -76,7 +75,6 @@ export async function handleProductSubmit(event) {
             body: JSON.stringify({ 
                 productId, 
                 quantity,
-                manufacturingUnitId,
                 logTypeId
             })
         });

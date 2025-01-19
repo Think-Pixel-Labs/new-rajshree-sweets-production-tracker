@@ -1,5 +1,6 @@
 let categories = [];
 let unitTypes = [];
+let manufacturingUnits = [];
 
 async function fetchCategories() {
     try {
@@ -19,6 +20,17 @@ async function fetchUnitTypes() {
         unitTypes = await response.json();
     } catch (error) {
         console.error('Error fetching unit types:', error);
+        throw error;
+    }
+}
+
+async function fetchManufacturingUnits() {
+    try {
+        const response = await fetch('/api/manufacturing-units');
+        if (!response.ok) throw new Error('Failed to fetch manufacturing units');
+        manufacturingUnits = await response.json();
+    } catch (error) {
+        console.error('Error fetching manufacturing units:', error);
         throw error;
     }
 }
@@ -67,8 +79,30 @@ function createUnitTypeSelect(currentValue = '') {
     return select;
 }
 
+function createManufacturingUnitSelect(currentValue = '') {
+    const select = document.createElement('select');
+    select.required = true;
+
+    const emptyOption = document.createElement('option');
+    emptyOption.value = '';
+    emptyOption.textContent = 'Select Manufacturing Unit';
+    select.appendChild(emptyOption);
+
+    manufacturingUnits.forEach(unit => {
+        const option = document.createElement('option');
+        option.value = unit.id;
+        option.textContent = unit.name;
+        if (unit.id === currentValue) {
+            option.selected = true;
+        }
+        select.appendChild(option);
+    });
+
+    return select;
+}
+
 export async function initializeSelects() {
-    await Promise.all([fetchCategories(), fetchUnitTypes()]);
+    await Promise.all([fetchCategories(), fetchUnitTypes(), fetchManufacturingUnits()]);
 
     // Initialize category selects
     const addCategoryContainer = document.getElementById('productCategory').parentElement;
@@ -91,6 +125,17 @@ export async function initializeSelects() {
     const editUnitSelect = createUnitTypeSelect();
     editUnitSelect.id = 'editProductUnitType';
     editUnitTypeContainer.replaceChild(editUnitSelect, document.getElementById('editProductUnitType'));
+
+    // Initialize manufacturing unit selects
+    const addManufacturingUnitContainer = document.getElementById('productManufacturingUnit').parentElement;
+    const addManufacturingUnitSelect = createManufacturingUnitSelect();
+    addManufacturingUnitSelect.id = 'productManufacturingUnit';
+    addManufacturingUnitContainer.replaceChild(addManufacturingUnitSelect, document.getElementById('productManufacturingUnit'));
+
+    const editManufacturingUnitContainer = document.getElementById('editProductManufacturingUnit').parentElement;
+    const editManufacturingUnitSelect = createManufacturingUnitSelect();
+    editManufacturingUnitSelect.id = 'editProductManufacturingUnit';
+    editManufacturingUnitContainer.replaceChild(editManufacturingUnitSelect, document.getElementById('editProductManufacturingUnit'));
 }
 
 export async function loadProductTable() {
@@ -136,8 +181,9 @@ function updateProductTable(products) {
         row.insertCell(0).textContent = product.name || '';
         row.insertCell(1).textContent = product.category || '';
         row.insertCell(2).textContent = product.unit || '';
+        row.insertCell(3).textContent = product.manufacturing_unit_name || '';
 
-        const actionsCell = row.insertCell(3);
+        const actionsCell = row.insertCell(4);
         actionsCell.className = 'actions-cell';
 
         // Store the product ID in the row's data attribute
@@ -148,12 +194,14 @@ function updateProductTable(products) {
         editButton.className = 'action-button edit-button';
         editButton.onclick = () => {
             const productData = {
-                id: product.id, // Don't parse here, keep original value
+                id: product.id,
                 name: product.name,
                 category_id: product.category_id,
                 unit_id: product.unit_id,
+                manufacturing_unit_id: product.manufacturing_unit_id,
                 category: product.category,
-                unit: product.unit
+                unit: product.unit,
+                manufacturing_unit_name: product.manufacturing_unit_name
             };
             console.log('Edit button clicked with data:', productData);
             editProduct(productData);
@@ -164,7 +212,7 @@ function updateProductTable(products) {
         deleteButton.textContent = 'Delete';
         deleteButton.className = 'action-button delete-button';
         deleteButton.onclick = () => {
-            const productId = product.id; // Don't parse here, keep original value
+            const productId = product.id;
             console.log('Delete button clicked for product:', { id: productId, product });
             deleteProduct(productId);
         };
@@ -177,12 +225,13 @@ export async function handleProductFormSubmit(event) {
     const name = document.getElementById('productName').value;
     const categoryId = document.getElementById('productCategory').value;
     const unitId = document.getElementById('productUnitType').value;
+    const manufacturingUnitId = document.getElementById('productManufacturingUnit').value;
 
     try {
         const response = await fetch('/api/products', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, categoryId, unitId })
+            body: JSON.stringify({ name, categoryId, unitId, manufacturingUnitId })
         });
 
         if (!response.ok) {
@@ -223,6 +272,12 @@ export async function editProduct(product) {
     const editUnitSelect = createUnitTypeSelect(product.unit_id);
     editUnitSelect.id = 'editProductUnitType';
     editUnitTypeContainer.replaceChild(editUnitSelect, document.getElementById('editProductUnitType'));
+
+    // Update manufacturing unit select with current value
+    const editManufacturingUnitContainer = document.getElementById('editProductManufacturingUnit').parentElement;
+    const editManufacturingUnitSelect = createManufacturingUnitSelect(product.manufacturing_unit_id);
+    editManufacturingUnitSelect.id = 'editProductManufacturingUnit';
+    editManufacturingUnitContainer.replaceChild(editManufacturingUnitSelect, document.getElementById('editProductManufacturingUnit'));
     
     // Set the product ID and show the dialog
     dialog.dataset.productId = product.id.toString();
@@ -248,18 +303,19 @@ export async function handleEditProductSubmit(event) {
     const name = document.getElementById('editProductName').value;
     const categoryId = parseInt(document.getElementById('editProductCategory').value);
     const unitId = parseInt(document.getElementById('editProductUnitType').value);
+    const manufacturingUnitId = parseInt(document.getElementById('editProductManufacturingUnit').value);
 
-    if (!name || !categoryId || !unitId) {
+    if (!name || !categoryId || !unitId || !manufacturingUnitId) {
         alert('All fields are required');
         return;
     }
 
     try {
-        console.log('Updating product:', { productId, name, categoryId, unitId }); // Debug log
+        console.log('Updating product:', { productId, name, categoryId, unitId, manufacturingUnitId }); // Debug log
         const response = await fetch(`/api/products/${productId}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, categoryId, unitId })
+            body: JSON.stringify({ name, categoryId, unitId, manufacturingUnitId })
         });
 
         if (!response.ok) {
