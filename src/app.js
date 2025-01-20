@@ -10,7 +10,20 @@ let db;
 
 function getDatabasePath() {
     if (app.isPackaged) {
-        const dbPath = path.join(process.resourcesPath, 'production.db');
+        const userDataPath = path.join(app.getPath('userData'), 'data');
+        if (!fs.existsSync(userDataPath)) {
+            fs.mkdirSync(userDataPath, { recursive: true });
+        }
+        const dbPath = path.join(userDataPath, 'production.db');
+        
+        // If database doesn't exist in user data, copy from resources
+        if (!fs.existsSync(dbPath)) {
+            const resourceDbPath = path.join(process.resourcesPath, 'production.db');
+            if (fs.existsSync(resourceDbPath)) {
+                fs.copyFileSync(resourceDbPath, dbPath);
+            }
+        }
+        
         console.log('Production DB Path:', dbPath);
         return dbPath;
     }
